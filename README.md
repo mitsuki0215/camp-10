@@ -38,8 +38,10 @@ npm install
 npm start
 ```
 
-ブラウザで `http://localhost:3000`にアクセスし、Reactアプリが動作していることを確認する
+ブラウザで http://localhost:3000 にアクセスし、Reactアプリが動作していることを確認する
+
 `control + C`で止めることができ、
+
 再度動かしたい時は、`cd frontend`をしたことを確認して、`npm start`をターミナルに打ち、Enterを押す
 
 3. バックエンド環境のセットアップ（FastAPI）
@@ -61,7 +63,9 @@ uvicorn main:app --reload
 ```
 
 ブラウザで http://localhost:8000/docs にアクセスし、FastAPIのSwagger UIが表示されることを確認する
+
 `control + C`で止めることができ、
+
 再度動かしたい時は、`cd backend`をしたことを確認して、`uvicorn main:app --reload`をターミナルに打ち、Enterを押す
 
 
