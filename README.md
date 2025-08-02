@@ -1,35 +1,24 @@
-# camp-10
-学生向けのアンケートサービス
+#  - 学生向けアンケートサービス
 
-## 使用技術スタック
+## 🚀 プロジェクト概要
+学生向けの匿名・非匿名アンケートサービス。アンケート作成・回答機能、ポイント・ランクシステム、AIを活用した回答評価などを実装予定。
 
-### フロントエンド (React)
-* **フレームワーク:** React
-* **言語:** JavaScript
-* **パッケージ管理:** npm
+## 🛠 技術スタック
 
-### バックエンド (FastAPI)
-* **フレームワーク:** FastAPI
-* **言語:** Python
-* **データベース:** Postgresql, Supabase
-* **Webサーバー:** Uvicorn
+**Frontend:** React + JavaScript  
+**Backend:** FastAPI + Python  
+**Database:** PostgreSQL (ローカル) / Supabase (本番)  
+**Deploy:** Vercel (Frontend) / Render (Backend)
 
-### デプロイ
-- **フロントエンド**: Vercel
-- **バックエンド**: Render
-- **データベース**: Supabase
+## クイックスタート
 
-
-## 開発環境構築ガイド
-
-1. リポジトリをクローン
+### 1. リポジトリをクローン
 ```bash
 git clone https://github.com/mitsuki0215/camp-10.git
 cd camp-10
 code .
 ```
-
-2. フロントエンド環境のセットアップ（React）
+### 2. フロントエンド環境のセットアップ（React）
 
 クローンしたリポジトリのルートディレクトリに移動して、以下のコマンドを実行する
 
@@ -39,37 +28,39 @@ npm install
 npm start
 ```
 
-ブラウザで http://localhost:3000 にアクセスし、Reactアプリが動作していることを確認する
+ブラウザで `http://localhost:3000`にアクセスし、Reactアプリが動作していることを確認する
 
 `control + C`で止めることができ、
 
 再度動かしたい時は、`cd frontend`をしたことを確認して、`npm start`をターミナルに打ち、Enterを押す
 
-3. バックエンド環境のセットアップ（FastAPI）
+### 3. バックエンド環境のセットアップ（FastAPI）
 
 vscodeで新しいターミナルを開き、バックエンドディレクトリに移動して、以下のコマンドを実行する
 
 ```bash
 cd backend
 python -m venv venv
+
+# 仮想環境の有効化
+
 # Windows:
 .\venv\Scripts\activate
+
 # macOS/Linux:
 source venv/bin/activate
 
-# 必要なPythonパッケージをインソール(backendディレクトリのまま以下のコマンドを実行する)
 pip install -r requirements.txt
 
 # FastAPI開発サーバーの起動
-uvicorn main:app --reload
+
+DEVELOPMENT=True uvicorn main:app --reload
 ```
 
-ブラウザで http://localhost:8000/docs にアクセスし、FastAPIのSwagger UIが表示されることを確認する
+→ http://localhost:8000/docs でAPI確認
 
-`control + C`で止めることができ、
-
-再度動かしたい時は、`cd backend`をしたことを確認して、`uvicorn main:app --reload`をターミナルに打ち、Enterを押す
-
+### 4. supabaseの環境変数設定
+- `backend/`直下に`.env`ファイルを作成して、LINEに貼り付けたコードをコピーアンドペーストする
 
 ## 実行
 
@@ -91,8 +82,14 @@ uvicorn main:app --reload
 ```
 → http://localhost:8000 でAPIサーバー起動
 
-### 動作確認
-- フロントエンド: http://localhost:3000
-- バックエンド API: http://localhost:8000/docs
+## 📝 開発フロー
+
+1. `dev` ブランチから新機能ブランチを作成
+2. 機能実装
+3. プルリクエスト作成
+4. マージ
+
+---
+**開発チーム:** チームもふもふ
 
 
