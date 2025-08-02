@@ -11,7 +11,7 @@
 ### バックエンド (FastAPI)
 * **フレームワーク:** FastAPI
 * **言語:** Python
-* **データベース:** SQLite, Supabase
+* **データベース:** Postgresql, Supabase
 * **Webサーバー:** Uvicorn
 
 ### デプロイ
