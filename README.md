@@ -15,7 +15,6 @@
 * **Webサーバー:** Uvicorn
 
 ### デプロイ
-
 - **フロントエンド**: Vercel
 - **バックエンド**: Render
 - **データベース**: Supabase
@@ -31,7 +30,9 @@ code .
 ```
 
 2. フロントエンド環境のセットアップ（React）
+
 クローンしたリポジトリのルートディレクトリに移動して、以下のコマンドを実行する
+
 ```bash
 cd frontend
 npm install
@@ -47,6 +48,7 @@ npm start
 3. バックエンド環境のセットアップ（FastAPI）
 
 vscodeで新しいターミナルを開き、バックエンドディレクトリに移動して、以下のコマンドを実行する
+
 ```bash
 cd backend
 python -m venv venv
@@ -72,7 +74,9 @@ uvicorn main:app --reload
 ## 実行
 
 ### 開発環境での起動
+
 **フロントエンド（ターミナル1）**
+
 ```bash
 cd frontend
 npm start
@@ -80,6 +84,7 @@ npm start
 → http://localhost:3000 でアクセス可能
 
 **バックエンド（ターミナル2）**
+
 ```bash
 cd backend
 uvicorn main:app --reload
