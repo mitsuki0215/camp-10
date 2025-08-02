@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-import models, schemas, database  # 相対インポートを絶対インポートに変更
+from . import models, schemas, database  # 相対インポートを絶対インポートに変更
 import os
 from dotenv import load_dotenv
 
