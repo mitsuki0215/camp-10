@@ -63,9 +63,9 @@ const Profile = () => {
           ← ホームに戻る
         </Link>
         <h1 className="page-title">プロフィール</h1>
-        <button className="edit-profile-btn">
+        <Link to="/profile/edit" className="edit-profile-btn">
           ✏️ プロフィール編集
-        </button>
+        </Link>
       </div>
 
       {/* ユーザー情報カード */}
