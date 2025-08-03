@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
@@ -51,11 +52,11 @@ const Home = () => {
             <span className="plus-icon">+</span>
             アンケート作成
           </button>
-          <div className="profile-icon">
+          <Link to="/profile" className="profile-icon">
             <div className="profile-avatar">
               <span>👤</span>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
