@@ -23,6 +23,7 @@
 .profile-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 2rem;
   gap: 1rem;
 }
@@ -48,6 +49,29 @@
   font-weight: 700;
   color: var(--primary-purple);
   margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.edit-profile-btn {
+  background: linear-gradient(135deg, var(--accent-purple), var(--primary-purple));
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.edit-profile-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
 }
 
 /* ユーザー情報カード */
@@ -83,24 +107,16 @@
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text-dark);
-  margin: 0 0 0.5rem 0;
-}
-
-.user-grade {
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-}
-
-.grade-label {
-  color: var(--text-gray);
-  font-weight: 500;
+  gap: 1rem;
 }
 
 .grade-value {
   color: var(--primary-purple);
   font-weight: 700;
+  font-size: 1.2rem;
   padding: 0.25rem 0.75rem;
   background: var(--light-purple);
   border-radius: 12px;
@@ -301,7 +317,8 @@
 }
 
 .view-results-btn,
-.edit-survey-btn {
+.publish-toggle-btn,
+.delete-survey-btn {
   padding: 0.5rem 1.5rem;
   border-radius: 8px;
   font-size: 0.875rem;
@@ -321,14 +338,26 @@
   box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
 }
 
-.edit-survey-btn {
-  background: var(--border-light);
-  color: var(--text-gray);
+.publish-toggle-btn {
+  background: var(--success-green);
+  color: var(--white);
 }
 
-.edit-survey-btn:hover {
-  background: var(--light-purple);
-  color: var(--primary-purple);
+.publish-toggle-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.delete-survey-btn {
+  background: #ef4444;
+  color: var(--white);
+}
+
+.delete-survey-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* レスポンシブデザイン */
@@ -339,8 +368,18 @@
 
   .profile-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .page-title {
+    text-align: center;
+  }
+
+  .edit-profile-btn {
+    width: 100%;
+    max-width: 200px;
   }
 
   .user-info-card {
@@ -364,7 +403,8 @@
   }
 
   .view-results-btn,
-  .edit-survey-btn {
+  .publish-toggle-btn,
+  .delete-survey-btn {
     width: 100%;
   }
 }
