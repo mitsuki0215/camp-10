@@ -67,6 +67,7 @@
   gap: 0.5rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+  text-decoration: none;
 }
 
 .edit-profile-btn:hover {
