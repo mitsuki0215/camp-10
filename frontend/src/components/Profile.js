@@ -63,6 +63,9 @@ const Profile = () => {
           ← ホームに戻る
         </Link>
         <h1 className="page-title">プロフィール</h1>
+        <button className="edit-profile-btn">
+          ✏️ プロフィール編集
+        </button>
       </div>
 
       {/* ユーザー情報カード */}
@@ -71,11 +74,10 @@ const Profile = () => {
           <span>👤</span>
         </div>
         <div className="user-details">
-          <h2 className="user-name">{user.name}</h2>
-          <div className="user-grade">
-            <span className="grade-label">学年:</span>
+          <h2 className="user-name">
+            {user.name} 
             <span className="grade-value">{user.grade}</span>
-          </div>
+          </h2>
         </div>
       </div>
 
@@ -137,7 +139,10 @@ const Profile = () => {
               </div>
               <div className="survey-actions">
                 <button className="view-results-btn">結果を見る</button>
-                <button className="edit-survey-btn">編集</button>
+                <button className="publish-toggle-btn">
+                  {post.status === '公開中' ? '公開終了' : '公開開始'}
+                </button>
+                <button className="delete-survey-btn">削除</button>
               </div>
             </div>
           ))}
