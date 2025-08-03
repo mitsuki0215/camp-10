@@ -48,10 +48,10 @@ const Home = () => {
       <div className="home-header">
         <h1 className="app-title">Questly</h1>
         <div className="header-actions">
-          <button className="add-survey-btn">
+          <Link to="/anq" className="add-survey-btn">
             <span className="plus-icon">+</span>
             アンケート作成
-          </button>
+          </Link>
           <Link to="/profile" className="profile-icon">
             <div className="profile-avatar">
               <span>👤</span>
