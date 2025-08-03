@@ -1,0 +1,386 @@
+/* Profile.css */
+:root {
+  --primary-purple: #6b46c1;
+  --light-purple: #e0e7ff;
+  --accent-purple: #a855f7;
+  --white: #ffffff;
+  --light-gray: #f8fafc;
+  --text-dark: #1e293b;
+  --text-gray: #64748b;
+  --border-light: #e2e8f0;
+  --success-green: #10b981;
+  --warning-orange: #f59e0b;
+}
+
+.profile-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--light-purple) 0%, var(--white) 50%, var(--light-purple) 100%);
+  padding: 2rem;
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+}
+
+/* ヘッダー部分 */
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.back-button {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 2px solid var(--primary-purple);
+}
+
+.back-button:hover {
+  background: var(--primary-purple);
+  color: var(--white);
+  transform: translateX(-2px);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-purple);
+  margin: 0;
+}
+
+/* ユーザー情報カード */
+.user-info-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 24px rgba(107, 70, 193, 0.15);
+  border: 1px solid var(--border-light);
+}
+
+.user-avatar-large {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--accent-purple), var(--primary-purple));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 0.5rem 0;
+}
+
+.user-grade {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.grade-label {
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.grade-value {
+  color: var(--primary-purple);
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  background: var(--light-purple);
+  border-radius: 12px;
+}
+
+/* ランク・経験値セクション */
+.rank-section {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+}
+
+.rank-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rank-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 3px solid;
+  border-radius: 16px;
+  background: var(--white);
+  width: fit-content;
+}
+
+.rank-icon {
+  font-size: 2rem;
+}
+
+.rank-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.experience-info {
+  flex: 1;
+}
+
+.experience-text {
+  font-size: 1rem;
+  color: var(--text-gray);
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.experience-bar {
+  width: 100%;
+  height: 12px;
+  background: var(--border-light);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.experience-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-purple), var(--accent-purple));
+  transition: width 0.5s ease;
+  border-radius: 6px;
+}
+
+/* ポイント情報 */
+.points-section {
+  margin-bottom: 2rem;
+}
+
+.points-card {
+  background: linear-gradient(135deg, var(--primary-purple), var(--accent-purple));
+  border-radius: 16px;
+  padding: 2rem;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 8px 24px rgba(107, 70, 193, 0.3);
+}
+
+.points-icon {
+  font-size: 3rem;
+}
+
+.points-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.points-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+}
+
+.points-description {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+/* 作成したアンケート一覧 */
+.my-surveys-section {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.my-surveys-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.my-survey-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.my-survey-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(107, 70, 193, 0.15);
+  border-color: var(--light-purple);
+}
+
+.survey-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: var(--success-green);
+  color: var(--white);
+}
+
+.status-badge.inactive {
+  background: var(--warning-orange);
+  color: var(--white);
+}
+
+.created-date {
+  color: var(--text-gray);
+  font-size: 0.875rem;
+}
+
+.survey-content {
+  margin-bottom: 1.5rem;
+}
+
+.survey-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 0.5rem 0;
+}
+
+.survey-description {
+  color: var(--text-gray);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.survey-stats {
+  font-size: 0.875rem;
+  color: var(--text-gray);
+}
+
+.survey-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.view-results-btn,
+.edit-survey-btn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.view-results-btn {
+  background: linear-gradient(135deg, var(--primary-purple), var(--accent-purple));
+  color: var(--white);
+}
+
+.view-results-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+}
+
+.edit-survey-btn {
+  background: var(--border-light);
+  color: var(--text-gray);
+}
+
+.edit-survey-btn:hover {
+  background: var(--light-purple);
+  color: var(--primary-purple);
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .user-info-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .rank-info {
+    align-items: center;
+  }
+
+  .points-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .survey-actions {
+    flex-direction: column;
+  }
+
+  .view-results-btn,
+  .edit-survey-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-name {
+    font-size: 1.5rem;
+  }
+
+  .my-survey-card {
+    padding: 1.5rem;
+  }
+
+  .survey-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
