@@ -1,45 +1,67 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { apiClient } from '../utils/api';
 import './Profile.css';
 
 const Profile = () => {
-  // ダミーデータ - ユーザー情報
-  const user = {
+  const [user, setUser] = useState({
     name: "田中 太郎",
     grade: "B3",
     rank: "Silver",
     experience: 1250,
     experienceToNext: 1500,
     points: 340
-  };
+  });
+  const [myPosts, setMyPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // ダミーデータ - 自分が作成したアンケート
-  const myPosts = [
-    {
-      id: 1,
-      title: "大学生のアルバイト事情について",
-      description: "大学生のアルバイトの実態調査",
-      responseCount: 34,
-      createdAt: "2024-07-15",
-      status: "公開中"
-    },
-    {
-      id: 2,
-      title: "オンライン授業の満足度調査",
-      description: "オンライン授業に対する学生の意見",
-      responseCount: 28,
-      createdAt: "2024-07-10",
-      status: "公開中"
-    },
-    {
-      id: 3,
-      title: "学食利用頻度アンケート",
-      description: "学食の利用実態について",
-      responseCount: 45,
-      createdAt: "2024-07-05",
-      status: "終了"
-    }
-  ];
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        // ユーザー情報を取得
+        // const userData = await apiClient.get('/api/user/profile');
+        // setUser(userData);
+
+        // 自分が作成したアンケートを取得
+        const surveysData = await apiClient.get('/api/user/surveys');
+        setMyPosts(surveysData);
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        // フォールバック: ダミーデータを使用
+        setMyPosts([
+          {
+            id: 1,
+            title: "大学生のアルバイト事情について",
+            description: "大学生のアルバイトの実態調査",
+            responseCount: 34,
+            createdAt: "2024-07-15",
+            status: "公開中"
+          },
+          {
+            id: 2,
+            title: "オンライン授業の満足度調査",
+            description: "オンライン授業に対する学生の意見",
+            responseCount: 28,
+            createdAt: "2024-07-10",
+            status: "公開中"
+          },
+          {
+            id: 3,
+            title: "学食利用頻度アンケート",
+            description: "学食の利用実態について",
+            responseCount: 45,
+            createdAt: "2024-07-05",
+            status: "終了"
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // 経験値の進捗率を計算
   const experienceProgress = (user.experience / user.experienceToNext) * 100;
@@ -119,6 +141,7 @@ const Profile = () => {
       {/* 作成したアンケート一覧 */}
       <div className="my-surveys-section">
         <h2 className="section-title">作成したアンケート</h2>
+        {loading && <p>読み込み中...</p>}
         <div className="my-surveys-list">
           {myPosts.map(post => (
             <div key={post.id} className="my-survey-card">
