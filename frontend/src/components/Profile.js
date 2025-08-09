@@ -61,12 +61,18 @@ const Profile = () => {
   }, []);
 
   // ユーザー情報のフォールバック
-  const displayUser = userStats || supabaseUser || {
-    name: firebaseUser?.displayName || firebaseUser?.email?.split('@')[0] || 'ユーザー',
-    rank: 'Bronze',
-    experience: 0,
-    experience_to_next: 100,
-    points: 0
+  const displayUser = {
+    name: supabaseUser?.name || firebaseUser?.displayName || firebaseUser?.email?.split('@')[0] || 'ユーザー',
+    email: supabaseUser?.email || firebaseUser?.email || '',
+    rank: userStats?.rank || supabaseUser?.rank || 'Bronze',
+    experience: userStats?.experience || supabaseUser?.experience || 0,
+    experience_to_next: userStats?.experience_to_next || supabaseUser?.experience_to_next || 100,
+    points: userStats?.points || supabaseUser?.points || 0,
+    grade: supabaseUser?.grade || '',
+    created_at: supabaseUser?.created_at || new Date().toISOString(),
+    created_surveys: userStats?.created_surveys || 0,
+    active_surveys: userStats?.active_surveys || 0,
+    responses_given: userStats?.responses_given || 0
   };
 
   // 経験値の進捗率を計算
@@ -104,8 +110,12 @@ const Profile = () => {
         <div className="user-details">
           <h2 className="user-name">
             {displayUser.name} 
-            <span className="grade-value">{displayUser.grade || ''}</span>
+            <span className="grade-value">{displayUser.grade}</span>
           </h2>
+          <p className="user-email">{displayUser.email}</p>
+          <p className="join-date">
+            登録日: {new Date(displayUser.created_at).toLocaleDateString('ja-JP')}
+          </p>
         </div>
       </div>
 
