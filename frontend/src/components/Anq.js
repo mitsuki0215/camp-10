@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
-import { apiClient } from '../utils/api';
+import { surveyService } from '../services/surveyService';
 import './Anq.css';
 
 const defaultQuestion = () => ({
@@ -67,12 +67,6 @@ const Anq = () => {
   };
 
 
-  // アンケート投稿処理（仮実装）
-  const handleSubmit = () => {
-    alert('アンケートが投稿されました！');
-    // 実際の実装では、APIにデータを送信
-    console.log('投稿データ:', questions);
-
   // アンケートを保存
   const saveSurvey = async () => {
     if (!title.trim()) {
@@ -93,7 +87,7 @@ const Anq = () => {
         }))
       };
 
-      await apiClient.post('/api/surveys', surveyData);
+      await surveyService.createSurvey(surveyData);
       alert('アンケートが保存されました！');
       
       // フォームをリセット
@@ -106,7 +100,6 @@ const Anq = () => {
     } finally {
       setSaving(false);
     }
-
   };
 
   return (
@@ -218,27 +211,13 @@ const Anq = () => {
         <Link to="/" className="cancel-btn">
           キャンセル
         </Link>
-        <button className="submit-btn" onClick={handleSubmit}>
-          アンケート投稿
-
-      /* コンフリクトを起こしたのでコメントアウト措置
-      <div className="survey-actions">
-        <button
-          className="add-question-main-btn"
-          onClick={addQuestion}
-        >
-          ＋ 質問を追加
-        </button>
-        <button
-          className="save-survey-btn"
+        <button 
+          className="submit-btn" 
           onClick={saveSurvey}
           disabled={saving}
         >
-          {saving ? '保存中...' : 'アンケートを保存'}
-
+          {saving ? '保存中...' : 'アンケート保存'}
         </button>
-        */
-
       </div>
     </div>
   );

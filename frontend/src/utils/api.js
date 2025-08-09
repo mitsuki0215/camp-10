@@ -1,3 +1,5 @@
+import { auth } from '../firebase/config';
+
 const API_BASE_URL = 'http://localhost:8000';
 
 export const apiClient = {
@@ -6,10 +8,12 @@ export const apiClient = {
       'Content-Type': 'application/json',
     };
 
-    if (useAuth) {
-      const token = localStorage.getItem('access_token');
-      if (token) {
+    if (useAuth && auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
         headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Failed to get Firebase token:', error);
       }
     }
 
@@ -31,10 +35,12 @@ export const apiClient = {
       'Content-Type': 'application/json',
     };
 
-    if (useAuth) {
-      const token = localStorage.getItem('access_token');
-      if (token) {
+    if (useAuth && auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
         headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Failed to get Firebase token:', error);
       }
     }
 
@@ -57,10 +63,12 @@ export const apiClient = {
       'Content-Type': 'application/json',
     };
 
-    if (useAuth) {
-      const token = localStorage.getItem('access_token');
-      if (token) {
+    if (useAuth && auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
         headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Failed to get Firebase token:', error);
       }
     }
 
@@ -83,10 +91,12 @@ export const apiClient = {
       'Content-Type': 'application/json',
     };
 
-    if (useAuth) {
-      const token = localStorage.getItem('access_token');
-      if (token) {
+    if (useAuth && auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
         headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Failed to get Firebase token:', error);
       }
     }
 
