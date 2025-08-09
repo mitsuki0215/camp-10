@@ -2,8 +2,13 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-# User Schemas
-class UserBase(BaseModel):
+# ベーススキーマ
+class BaseSchema(BaseModel):
+    class Config:
+        from_attributes = True
+
+# ユーザー関連スキーマ
+class UserBase(BaseSchema):
     email: EmailStr
     name: str
     grade: Optional[str] = None
@@ -11,7 +16,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-class UserLogin(BaseModel):
+class UserLogin(BaseSchema):
     email: EmailStr
     password: str
 
@@ -25,51 +30,49 @@ class User(UserBase):
     points: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class UserProfile(User):
+    """ユーザープロフィール詳細"""
     pass
 
-# Token Schemas
-class Token(BaseModel):
+# トークン関連スキーマ
+class Token(BaseSchema):
     access_token: str
     refresh_token: str
     token_type: str
 
-class TokenData(BaseModel):
+class TokenData(BaseSchema):
     username: Optional[str] = None
 
-# Email Verification Schemas
-class EmailVerificationCreate(BaseModel):
+# メール認証関連スキーマ
+class EmailVerificationCreate(BaseSchema):
     email: EmailStr
 
-class EmailVerificationVerify(BaseModel):
+class EmailVerificationVerify(BaseSchema):
     token: str
 
-# Password Reset Schemas
-class PasswordResetRequest(BaseModel):
+# パスワードリセット関連スキーマ
+class PasswordResetRequest(BaseSchema):
     email: EmailStr
 
-class PasswordResetConfirm(BaseModel):
+class PasswordResetConfirm(BaseSchema):
     token: str
     new_password: str
 
-# Survey Schemas
-class QuestionBase(BaseModel):
+# アンケート関連スキーマ
+class QuestionBase(BaseSchema):
     text: str
     type: str  # 'short', 'paragraph', 'radio', 'checkbox'
     options: List[str] = []
     required: bool = False
 
-class SurveyBase(BaseModel):
+class SurveyBase(BaseSchema):
     title: str
     description: Optional[str] = None
 
 class SurveyCreate(SurveyBase):
     questions: List[QuestionBase]
 
-class SurveyUpdate(BaseModel):
+class SurveyUpdate(BaseSchema):
     title: Optional[str] = None
     description: Optional[str] = None
     questions: Optional[List[QuestionBase]] = None
@@ -84,10 +87,8 @@ class Survey(SurveyBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
-class SurveyList(BaseModel):
+class SurveyList(BaseSchema):
+    """アンケート一覧表示用"""
     id: int
     title: str
     description: Optional[str]
@@ -95,26 +96,31 @@ class SurveyList(BaseModel):
     duration: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
-# Survey Response Schemas
-class SurveyResponseCreate(BaseModel):
+# アンケート回答関連スキーマ
+class SurveyResponseCreate(BaseSchema):
     responses: Dict[str, Any]  # question_id -> answer
 
-class SurveyResponse(BaseModel):
+class SurveyResponse(BaseSchema):
     id: int
     survey_id: int
     user_id: Optional[int]
     responses: Dict[str, Any]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
-# API Response Schemas
-class Message(BaseModel):
+# レスポンス用スキーマ
+class Message(BaseSchema):
     message: str
 
-class ErrorResponse(BaseModel):
+class ErrorResponse(BaseSchema):
     detail: str
+
+# 統計情報スキーマ
+class UserStats(BaseSchema):
+    created_surveys: int
+    active_surveys: int
+    total_responses_received: int
+    responses_given: int
+    rank: str
+    experience: int
+    experience_to_next: int
+    points: int

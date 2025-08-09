@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
+from app.core.database import Base
 
 class User(Base):
+    """ユーザーモデル"""
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -20,12 +21,13 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # Relations
+    # リレーション
     surveys = relationship("Survey", back_populates="creator")
     email_verifications = relationship("EmailVerification", back_populates="user")
     password_resets = relationship("PasswordReset", back_populates="user")
 
 class EmailVerification(Base):
+    """メール認証モデル"""
     __tablename__ = "email_verifications"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -35,10 +37,11 @@ class EmailVerification(Base):
     is_used = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relations
+    # リレーション
     user = relationship("User", back_populates="email_verifications")
 
 class PasswordReset(Base):
+    """パスワードリセットモデル"""
     __tablename__ = "password_resets"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -48,35 +51,5 @@ class PasswordReset(Base):
     is_used = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relations
+    # リレーション
     user = relationship("User", back_populates="password_resets")
-
-class Survey(Base):
-    __tablename__ = "surveys"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    questions = Column(JSON, nullable=False)  # Store questions as JSON
-    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    is_active = Column(Boolean, default=True)
-    response_count = Column(Integer, default=0)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-    # Relations
-    creator = relationship("User", back_populates="surveys")
-    responses = relationship("SurveyResponse", back_populates="survey")
-
-class SurveyResponse(Base):
-    __tablename__ = "survey_responses"
-
-    id = Column(Integer, primary_key=True, index=True)
-    survey_id = Column(Integer, ForeignKey("surveys.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Anonymous responses allowed
-    responses = Column(JSON, nullable=False)  # Store responses as JSON
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relations
-    survey = relationship("Survey", back_populates="responses")
-    user = relationship("User")

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
 import { apiClient } from '../utils/api';
 import './Anq.css';
@@ -65,6 +66,13 @@ const Anq = () => {
     }));
   };
 
+
+  // アンケート投稿処理（仮実装）
+  const handleSubmit = () => {
+    alert('アンケートが投稿されました！');
+    // 実際の実装では、APIにデータを送信
+    console.log('投稿データ:', questions);
+
   // アンケートを保存
   const saveSurvey = async () => {
     if (!title.trim()) {
@@ -98,6 +106,7 @@ const Anq = () => {
     } finally {
       setSaving(false);
     }
+
   };
 
   return (
@@ -196,6 +205,23 @@ const Anq = () => {
           )}
         </div>
       ))}
+
+      <button
+        className="add-question-main-btn"
+        onClick={addQuestion}
+      >
+        ＋ 質問を追加
+      </button>
+      
+      {/* アクションボタン */}
+      <div className="action-buttons">
+        <Link to="/" className="cancel-btn">
+          キャンセル
+        </Link>
+        <button className="submit-btn" onClick={handleSubmit}>
+          アンケート投稿
+
+      /* コンフリクトを起こしたのでコメントアウト措置
       <div className="survey-actions">
         <button
           className="add-question-main-btn"
@@ -209,7 +235,10 @@ const Anq = () => {
           disabled={saving}
         >
           {saving ? '保存中...' : 'アンケートを保存'}
+
         </button>
+        */
+
       </div>
     </div>
   );
