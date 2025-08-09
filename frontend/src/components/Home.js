@@ -30,11 +30,11 @@ const Home = () => {
         console.error('Failed to fetch surveys:', err);
         // APIが利用できない場合はダミーデータを表示し、エラーメッセージは非表示
         setSurveys([
-          { id: 1, title: "大学生活に関するアンケート", description: "大学生活の満足度や改善点について教えてください", points: 30, responseCount: 24, duration: "約3分" },
-          { id: 2, title: "オンライン授業の評価調査", description: "オンライン授業の効果性や課題について", points: 50, responseCount: 18, duration: "約5分" },
-          { id: 3, title: "キャンパス施設利用に関するアンケート", description: "図書館や食堂、体育館などの施設利用について", points: 40, responseCount: 42, duration: "約4分" },
-          { id: 4, title: "就職活動支援サービスについて", description: "キャリア支援センターやインターンシップについて", points: 60, responseCount: 31, duration: "約6分" },
-          { id: 5, title: "学食メニューの改善提案", description: "学食のメニューや価格についてのご意見をお聞かせください", points: 20, responseCount: 67, duration: "約2分" }
+          { id: 1, title: "大学生活に関するアンケート", description: "大学生活の満足度や改善点について教えてください", points: 1300, responseCount: 24, targetResponses: 50, duration: "約3分" },
+          { id: 2, title: "オンライン授業の評価調査", description: "オンライン授業の効果性や課題について", points: 500, responseCount: 18, targetResponses: 30, duration: "約5分" },
+          { id: 3, title: "キャンパス施設利用に関するアンケート", description: "図書館や食堂、体育館などの施設利用について", points: 400, responseCount: 42, targetResponses: 40, duration: "約4分" },
+          { id: 4, title: "就職活動支援サービスについて", description: "キャリア支援センターやインターンシップについて", points: 600, responseCount: 31, targetResponses: 60, duration: "約6分" },
+          { id: 5, title: "学食メニューの改善提案", description: "学食のメニューや価格についてのご意見をお聞かせください", points: 2000, responseCount: 67, targetResponses: 100, duration: "約2分" }
         ]);
         setError(null); // ダミーデータを表示する場合はエラーメッセージを非表示
       } finally {
@@ -93,7 +93,9 @@ const Home = () => {
                 <p className="survey-description">{survey.description}</p>
                 <div className="survey-meta">
                   <span className="points">{survey.points}P</span>
-                  <span className="response-count">{survey.responseCount}人が回答</span>
+                  <span className={`response-count ${survey.responseCount >= survey.targetResponses ? 'target-achieved' : ''}`}>
+                    {survey.responseCount}人が回答 / {survey.targetResponses}人回答希望
+                  </span>
                   <span className="duration">{survey.duration}</span>
                 </div>
               </div>

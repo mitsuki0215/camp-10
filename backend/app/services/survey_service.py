@@ -1,5 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from fastapi import HTTPException
 
 from app.models import Survey, SurveyResponse, User
@@ -9,9 +10,11 @@ class SurveyService:
     """アンケートサービス"""
     
     def get_active_surveys(self, db: Session, skip: int = 0, limit: int = 100) -> List[Survey]:
-        """アクティブなアンケート一覧を取得"""
+        """アクティブなアンケート一覧を取得（シンプル版）"""
         return db.query(Survey).filter(
             Survey.is_active == True
+        ).order_by(
+            desc(Survey.created_at)
         ).offset(skip).limit(limit).all()
     
     def get_survey_by_id(self, db: Session, survey_id: int) -> Optional[Survey]:
@@ -21,25 +24,49 @@ class SurveyService:
             Survey.is_active == True
         ).first()
     
-    def create_survey(self, db: Session, survey: SurveyCreate, creator: User) -> Survey:
-        """アンケートを作成"""
+# ハッカソン版のcreate_surveyは削除 - create_survey_simpleのみ残す
+    
+    def create_survey_simple(self, db: Session, survey: SurveyCreate) -> Survey:
+        """アンケートを作成（シンプル版：認証なし）"""
         questions_dict = [q.dict() for q in survey.questions]
         
         db_survey = Survey(
             title=survey.title,
             description=survey.description,
             questions=questions_dict,
-            creator_id=creator.id
+            creator_id=1  # テスト用固定値
         )
         
         db.add(db_survey)
         db.commit()
         db.refresh(db_survey)
         
-        # ユーザーにポイントと経験値を付与
-        self._award_points_for_creation(db, creator)
-        
         return db_survey
+    
+    def delete_survey_simple(self, db: Session, survey_id: int) -> None:
+        """アンケートを削除（シンプル版：認証なし）"""
+        survey = db.query(Survey).filter(Survey.id == survey_id).first()
+        
+        if not survey:
+            raise HTTPException(status_code=404, detail="アンケートが見つかりません")
+        
+        # 関連する回答を先に削除
+        db.query(SurveyResponse).filter(
+            SurveyResponse.survey_id == survey_id
+        ).delete()
+        
+        # アンケートを削除
+        db.delete(survey)
+        db.commit()
+    
+    def get_surveys_by_creator(self, db: Session, creator_id: int) -> List[Survey]:
+        """指定したユーザーが作成したアンケート一覧を取得"""
+        return db.query(Survey).filter(
+            Survey.creator_id == creator_id,
+            Survey.is_active == True
+        ).order_by(
+            desc(Survey.created_at)
+        ).all()
     
     def update_survey(
         self, 
@@ -89,45 +116,7 @@ class SurveyService:
         db.delete(survey)
         db.commit()
     
-    def submit_response(
-        self, 
-        db: Session, 
-        survey_id: int, 
-        responses: dict, 
-        user: Optional[User] = None
-    ) -> None:
-        """アンケートに回答"""
-        survey = self.get_survey_by_id(db, survey_id)
-        if not survey:
-            raise HTTPException(status_code=404, detail="アンケートが見つかりません")
-        
-        # ユーザーが既に回答済みかチェック（ログイン済みの場合）
-        if user:
-            existing_response = db.query(SurveyResponse).filter(
-                SurveyResponse.survey_id == survey_id,
-                SurveyResponse.user_id == user.id
-            ).first()
-            
-            if existing_response:
-                raise HTTPException(status_code=400, detail="既にこのアンケートに回答済みです")
-        
-        # 回答を保存
-        db_response = SurveyResponse(
-            survey_id=survey_id,
-            user_id=user.id if user else None,
-            responses=responses
-        )
-        
-        db.add(db_response)
-        
-        # アンケートの回答数を更新
-        survey.response_count += 1
-        
-        # ユーザーにポイントと経験値を付与（ログイン済みの場合）
-        if user:
-            self._award_points_for_response(db, user)
-        
-        db.commit()
+# submit_response機能も削除 - アンケート基本機能に集中
     
     def get_survey_responses(self, db: Session, survey_id: int, current_user: User) -> List[SurveyResponse]:
         """アンケートの回答一覧を取得（作成者のみ）"""
@@ -143,33 +132,8 @@ class SurveyService:
             SurveyResponse.survey_id == survey_id
         ).all()
     
-    def _award_points_for_creation(self, db: Session, user: User):
-        """アンケート作成時のポイント・経験値付与"""
-        user.points += 10
-        user.experience += 50
-        self._check_rank_upgrade(user)
-        db.commit()
-    
-    def _award_points_for_response(self, db: Session, user: User):
-        """アンケート回答時のポイント・経験値付与"""
-        user.points += 5
-        user.experience += 20
-        self._check_rank_upgrade(user)
-        db.commit()
-    
-    def _check_rank_upgrade(self, user: User):
-        """ランクアップのチェック"""
-        if user.experience >= user.experience_to_next:
-            user.experience -= user.experience_to_next
-            user.experience_to_next = int(user.experience_to_next * 1.5)
-            
-            # ランクアップ判定
-            if user.rank == "Bronze" and user.experience_to_next >= 150:
-                user.rank = "Silver"
-            elif user.rank == "Silver" and user.experience_to_next >= 300:
-                user.rank = "Gold"
-            elif user.rank == "Gold" and user.experience_to_next >= 600:
-                user.rank = "Platinum"
+# ハッカソン関連の複雑な機能（ポイント取引、優先度計算、ランク機能、分析機能）は削除
+# アンケート基本機能に集中
 
 # グローバルアンケートサービスインスタンス
 survey_service = SurveyService()

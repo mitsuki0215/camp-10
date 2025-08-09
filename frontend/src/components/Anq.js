@@ -16,7 +16,12 @@ const Anq = () => {
   const [questions, setQuestions] = useState([defaultQuestion()]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [requiredPoints, setRequiredPoints] = useState(1000);
+  const [targetResponses, setTargetResponses] = useState(50);
+  const [estimatedTime, setEstimatedTime] = useState(5);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const addQuestion = () => {
     setQuestions([...questions, defaultQuestion()]);
@@ -60,9 +65,42 @@ const Anq = () => {
     }));
   };
 
-  const saveSurvey = async () => {
+  const validateForm = () => {
+    const newErrors = {};
+
+    // タイトル必須
     if (!title.trim()) {
-      alert('アンケートのタイトルを入力してください');
+      newErrors.title = 'アンケートのタイトルを入力してください';
+    }
+
+    // 締切日必須
+    if (!deadline) {
+      newErrors.deadline = '回答期限を設定してください';
+    }
+
+    // ポイントのバリデーション
+    if (requiredPoints < 1000) {
+      newErrors.requiredPoints = '最低1000ポイントが必要です';
+    } else if (requiredPoints % 100 !== 0) {
+      newErrors.requiredPoints = '100ポイント刻みで設定してください';
+    }
+
+    // 回答者数必須
+    if (targetResponses < 1) {
+      newErrors.targetResponses = '1人以上の回答者数を設定してください';
+    }
+
+    // 推定時間必須
+    if (estimatedTime < 1) {
+      newErrors.estimatedTime = '1分以上の回答時間を設定してください';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const saveSurvey = async () => {
+    if (!validateForm()) {
       return;
     }
 
@@ -71,6 +109,10 @@ const Anq = () => {
       const surveyData = {
         title: title.trim(),
         description: description.trim(),
+        deadline: deadline,
+        requiredPoints: requiredPoints,
+        targetResponses: targetResponses,
+        estimatedTime: estimatedTime,
         questions: questions.map(q => ({
           text: q.text,
           type: q.type,
@@ -82,9 +124,15 @@ const Anq = () => {
       await surveyService.createSurvey(surveyData);
       alert('アンケートが保存されました！');
 
+      // フォームリセット
       setTitle('');
       setDescription('');
+      setDeadline('');
+      setRequiredPoints(1000);
+      setTargetResponses(50);
+      setEstimatedTime(5);
       setQuestions([defaultQuestion()]);
+      setErrors({});
     } catch (error) {
       console.error('Failed to save survey:', error);
       alert('アンケートの保存に失敗しました');
@@ -95,33 +143,93 @@ const Anq = () => {
 
   return (
     <div className="anq-container">
-      <h1 className="anq-title">アンケート作成</h1>
+      <div className="anq-content">
+        <h1 className="anq-title">アンケート作成</h1>
 
-      {/* アンケート基本情報 */}
-      <div className="survey-info-section">
-        <div className="input-group">
-          <label htmlFor="survey-title">アンケートタイトル *</label>
-          <input
-            id="survey-title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="アンケートのタイトルを入力してください"
-            className="survey-title-input"
-          />
+        {/* アンケート基本情報 */}
+        <div className="survey-info-section">
+          <div className="input-group">
+            <label htmlFor="survey-title">アンケートタイトル *</label>
+            <input
+              id="survey-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="アンケートのタイトルを入力してください"
+              className="survey-title-input"
+            />
+            {errors.title && <span className="error-message">{errors.title}</span>}
+          </div>
+          
+          <div className="input-group">
+            <label htmlFor="survey-description">説明</label>
+            <textarea
+              id="survey-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="アンケートの説明を入力してください（任意）"
+              className="survey-description-input"
+              rows="3"
+            />
+          </div>
+
+          <div className="input-row">
+            <div className="input-group">
+              <label htmlFor="survey-deadline">回答期限 *</label>
+              <input
+                id="survey-deadline"
+                type="datetime-local"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                className="survey-input"
+              />
+              {errors.deadline && <span className="error-message">{errors.deadline}</span>}
+            </div>
+            
+            <div className="input-group">
+              <label htmlFor="required-points">必要ポイント *</label>
+              <input
+                id="required-points"
+                type="number"
+                value={requiredPoints}
+                onChange={(e) => setRequiredPoints(parseInt(e.target.value) || 0)}
+                min="1000"
+                step="100"
+                className="survey-input"
+              />
+              {errors.requiredPoints && <span className="error-message">{errors.requiredPoints}</span>}
+            </div>
+          </div>
+
+          <div className="input-row">
+            <div className="input-group">
+              <label htmlFor="target-responses">目標回答者数 *</label>
+              <input
+                id="target-responses"
+                type="number"
+                value={targetResponses}
+                onChange={(e) => setTargetResponses(parseInt(e.target.value) || 0)}
+                min="1"
+                className="survey-input"
+              />
+              {errors.targetResponses && <span className="error-message">{errors.targetResponses}</span>}
+            </div>
+            
+            <div className="input-group">
+              <label htmlFor="estimated-time">回答時間の目安（分） *</label>
+              <input
+                id="estimated-time"
+                type="number"
+                value={estimatedTime}
+                onChange={(e) => setEstimatedTime(parseInt(e.target.value) || 0)}
+                min="1"
+                className="survey-input"
+              />
+              {errors.estimatedTime && <span className="error-message">{errors.estimatedTime}</span>}
+            </div>
+          </div>
         </div>
-        <div className="input-group">
-          <label htmlFor="survey-description">説明</label>
-          <textarea
-            id="survey-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="アンケートの説明を入力してください（任意）"
-            className="survey-description-input"
-            rows="3"
-          />
-        </div>
-      </div>
 
       {questions.map(q => (
         <div key={q.id} className="question-card">
@@ -198,19 +306,20 @@ const Anq = () => {
         ＋ 質問を追加
       </button>
 
-      {/* アクションボタン */}
-      <div className="action-buttons">
-        <Link to="/" className="cancel-btn">
-          キャンセル
-        </Link>
+        {/* アクションボタン */}
+        <div className="action-buttons">
+          <Link to="/" className="cancel-btn">
+            キャンセル
+          </Link>
 
-        <button 
-          className="submit-btn" 
-          onClick={saveSurvey}
-          disabled={saving}
-        >
-          {saving ? '保存中...' : 'アンケート保存'}
-        </button>
+          <button 
+            className="submit-btn" 
+            onClick={saveSurvey}
+            disabled={saving}
+          >
+            {saving ? '保存中...' : 'アンケート保存'}
+          </button>
+        </div>
       </div>
     </div>
   );
