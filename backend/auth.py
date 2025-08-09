@@ -5,9 +5,9 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-import models
-import schemas
-from database import get_db
+from app.models.user_models import User
+from app.models.schemas import TokenData
+from app.core.database import get_db
 import secrets
 import os
 
@@ -59,13 +59,13 @@ def verify_token(token: str, token_type: str = "access"):
         if username is None or token_type_in_payload != token_type:
             return None
             
-        return schemas.TokenData(username=username)
+        return TokenData(username=username)
     except JWTError:
         return None
 
 def authenticate_user(db: Session, email: str, password: str):
     """Authenticate a user"""
-    user = db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -87,19 +87,19 @@ def get_current_user(
     if token_data is None:
         raise credentials_exception
     
-    user = db.query(models.User).filter(models.User.email == token_data.username).first()
+    user = db.query(User).filter(User.email == token_data.username).first()
     if user is None:
         raise credentials_exception
     
     return user
 
-def get_current_active_user(current_user: models.User = Depends(get_current_user)):
+def get_current_active_user(current_user: User = Depends(get_current_user)):
     """Get current active user"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-def get_current_verified_user(current_user: models.User = Depends(get_current_active_user)):
+def get_current_verified_user(current_user: User = Depends(get_current_active_user)):
     """Get current verified user"""
     if not current_user.is_verified:
         raise HTTPException(status_code=400, detail="Email not verified")

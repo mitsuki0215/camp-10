@@ -1,24 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-import models
-import schemas
-from database import get_db
+from app.models.user_models import User
+from app.models.survey_models import Survey
+from app.models.schemas import UserProfile, UserBase, Survey as SurveySchema
+from app.core.database import get_db
 from auth import get_current_verified_user
 
 router = APIRouter(prefix="/api/user", tags=["users"])
 
-@router.get("/profile", response_model=schemas.UserProfile)
+@router.get("/profile", response_model=UserProfile)
 async def get_user_profile(
-    current_user: models.User = Depends(get_current_verified_user)
+    current_user: User = Depends(get_current_verified_user)
 ):
     """Get current user's profile"""
     return current_user
 
-@router.put("/profile", response_model=schemas.UserProfile)
+@router.put("/profile", response_model=UserProfile)
 async def update_user_profile(
-    profile_update: schemas.UserBase,
-    current_user: models.User = Depends(get_current_verified_user),
+    profile_update: UserBase,
+    current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
     """Update current user's profile"""
@@ -31,51 +32,49 @@ async def update_user_profile(
     
     return current_user
 
-@router.get("/surveys", response_model=List[schemas.Survey])
+@router.get("/surveys", response_model=List[SurveySchema])
 async def get_user_surveys(
-    current_user: models.User = Depends(get_current_verified_user),
+    current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
     """Get current user's created surveys"""
-    surveys = db.query(models.Survey).filter(
-        models.Survey.creator_id == current_user.id
+    surveys = db.query(Survey).filter(
+        Survey.creator_id == current_user.id
     ).all()
     
     return surveys
 
 @router.get("/stats", response_model=dict)
 async def get_user_stats(
-    current_user: models.User = Depends(get_current_verified_user),
+    current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
-    """Get current user's statistics"""
-    # Count created surveys
-    created_surveys = db.query(models.Survey).filter(
-        models.Survey.creator_id == current_user.id
+    """Get user statistics"""
+    created_surveys = db.query(Survey).filter(
+        Survey.creator_id == current_user.id
     ).count()
     
-    # Count active surveys
-    active_surveys = db.query(models.Survey).filter(
-        models.Survey.creator_id == current_user.id,
-        models.Survey.is_active == True
+    active_surveys = db.query(Survey).filter(
+        Survey.creator_id == current_user.id,
+        Survey.is_active == True
     ).count()
     
-    # Count responses to user's surveys
-    total_responses = db.query(models.SurveyResponse).join(
-        models.Survey
-    ).filter(
-        models.Survey.creator_id == current_user.id
-    ).count()
+    # Calculate total responses received on user's surveys
+    user_surveys = db.query(Survey).filter(
+        Survey.creator_id == current_user.id
+    ).all()
+    total_responses_received = sum(survey.response_count for survey in user_surveys)
     
-    # Count user's responses to other surveys
-    responses_given = db.query(models.SurveyResponse).filter(
-        models.SurveyResponse.user_id == current_user.id
+    # Count responses given by user
+    from app.models.survey_models import SurveyResponse
+    responses_given = db.query(SurveyResponse).filter(
+        SurveyResponse.user_id == current_user.id
     ).count()
     
     return {
         "created_surveys": created_surveys,
         "active_surveys": active_surveys,
-        "total_responses_received": total_responses,
+        "total_responses_received": total_responses_received,
         "responses_given": responses_given,
         "rank": current_user.rank,
         "experience": current_user.experience,

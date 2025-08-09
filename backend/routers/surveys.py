@@ -2,22 +2,23 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import models
-import schemas
-from database import get_db
+from app.models.user_models import User
+from app.models.survey_models import Survey, SurveyResponse
+from app.models.schemas import SurveyList, Survey as SurveySchema, SurveyCreate, SurveyUpdate, SurveyResponseCreate, SurveyResponse as SurveyResponseSchema, Message
+from app.core.database import get_db
 from auth import get_current_verified_user, get_current_user
 
 router = APIRouter(prefix="/api/surveys", tags=["surveys"])
 
-@router.get("/", response_model=List[schemas.SurveyList])
+@router.get("/", response_model=List[SurveyList])
 async def get_surveys(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
     """Get list of active surveys"""
-    surveys = db.query(models.Survey).filter(
-        models.Survey.is_active == True
+    surveys = db.query(Survey).filter(
+        Survey.is_active == True
     ).offset(skip).limit(limit).all()
     
     # Convert to SurveyList format
@@ -32,19 +33,19 @@ async def get_surveys(
             "duration": duration,
             "created_at": survey.created_at
         }
-        survey_list.append(schemas.SurveyList(**survey_data))
+        survey_list.append(SurveyList(**survey_data))
     
     return survey_list
 
-@router.get("/{survey_id}", response_model=schemas.Survey)
+@router.get("/{survey_id}", response_model=SurveySchema)
 async def get_survey(
     survey_id: int,
     db: Session = Depends(get_db)
 ):
     """Get a specific survey by ID"""
-    survey = db.query(models.Survey).filter(
-        models.Survey.id == survey_id,
-        models.Survey.is_active == True
+    survey = db.query(Survey).filter(
+        Survey.id == survey_id,
+        Survey.is_active == True
     ).first()
     
     if not survey:
@@ -55,17 +56,17 @@ async def get_survey(
     
     return survey
 
-@router.post("/", response_model=schemas.Survey)
+@router.post("/", response_model=SurveySchema)
 async def create_survey(
-    survey: schemas.SurveyCreate,
-    current_user: models.User = Depends(get_current_verified_user),
+    survey: SurveyCreate,
+    current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
     """Create a new survey"""
     # Convert questions to dict format for JSON storage
     questions_dict = [q.dict() for q in survey.questions]
     
-    db_survey = models.Survey(
+    db_survey = Survey(
         title=survey.title,
         description=survey.description,
         questions=questions_dict,
@@ -97,16 +98,16 @@ async def create_survey(
     
     return db_survey
 
-@router.put("/{survey_id}", response_model=schemas.Survey)
+@router.put("/{survey_id}", response_model=SurveySchema)
 async def update_survey(
     survey_id: int,
-    survey_update: schemas.SurveyUpdate,
-    current_user: models.User = Depends(get_current_verified_user),
+    survey_update: SurveyUpdate,
+    current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
     """Update a survey (only by creator)"""
-    survey = db.query(models.Survey).filter(
-        models.Survey.id == survey_id
+    survey = db.query(Survey).filter(
+        Survey.id == survey_id
     ).first()
     
     if not survey:
@@ -135,15 +136,15 @@ async def update_survey(
     
     return survey
 
-@router.delete("/{survey_id}", response_model=schemas.Message)
+@router.delete("/{survey_id}", response_model=Message)
 async def delete_survey(
     survey_id: int,
-    current_user: models.User = Depends(get_current_verified_user),
+    current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
     """Delete a survey (only by creator)"""
-    survey = db.query(models.Survey).filter(
-        models.Survey.id == survey_id
+    survey = db.query(Survey).filter(
+        Survey.id == survey_id
     ).first()
     
     if not survey:
@@ -159,8 +160,8 @@ async def delete_survey(
         )
     
     # Delete associated responses first
-    db.query(models.SurveyResponse).filter(
-        models.SurveyResponse.survey_id == survey_id
+    db.query(SurveyResponse).filter(
+        SurveyResponse.survey_id == survey_id
     ).delete()
     
     # Delete survey
@@ -172,7 +173,7 @@ async def delete_survey(
 def get_current_user_optional(
     db: Session = Depends(get_db),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
-) -> Optional[models.User]:
+) -> Optional[User]:
     """Get current user if authenticated, otherwise return None"""
     if not credentials:
         return None
@@ -183,22 +184,22 @@ def get_current_user_optional(
         if token_data is None:
             return None
         
-        user = db.query(models.User).filter(models.User.email == token_data.username).first()
+        user = db.query(User).filter(User.email == token_data.username).first()
         return user if user and user.is_active else None
     except:
         return None
 
-@router.post("/{survey_id}/responses", response_model=schemas.Message)
+@router.post("/{survey_id}/responses", response_model=Message)
 async def submit_survey_response(
     survey_id: int,
-    response: schemas.SurveyResponseCreate,
+    response: SurveyResponseCreate,
     db: Session = Depends(get_db),
-    current_user: Optional[models.User] = Depends(get_current_user_optional)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """Submit a response to a survey"""
-    survey = db.query(models.Survey).filter(
-        models.Survey.id == survey_id,
-        models.Survey.is_active == True
+    survey = db.query(Survey).filter(
+        Survey.id == survey_id,
+        Survey.is_active == True
     ).first()
     
     if not survey:
@@ -209,9 +210,9 @@ async def submit_survey_response(
     
     # Check if user already responded (if logged in)
     if current_user:
-        existing_response = db.query(models.SurveyResponse).filter(
-            models.SurveyResponse.survey_id == survey_id,
-            models.SurveyResponse.user_id == current_user.id
+        existing_response = db.query(SurveyResponse).filter(
+            SurveyResponse.survey_id == survey_id,
+            SurveyResponse.user_id == current_user.id
         ).first()
         
         if existing_response:
@@ -221,7 +222,7 @@ async def submit_survey_response(
             )
     
     # Create response
-    db_response = models.SurveyResponse(
+    db_response = SurveyResponse(
         survey_id=survey_id,
         user_id=current_user.id if current_user else None,
         responses=response.responses
@@ -253,15 +254,15 @@ async def submit_survey_response(
     
     return {"message": "Response submitted successfully"}
 
-@router.get("/{survey_id}/responses", response_model=List[schemas.SurveyResponse])
+@router.get("/{survey_id}/responses", response_model=List[SurveyResponseSchema])
 async def get_survey_responses(
     survey_id: int,
-    current_user: models.User = Depends(get_current_verified_user),
+    current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
     """Get responses for a survey (only by survey creator)"""
-    survey = db.query(models.Survey).filter(
-        models.Survey.id == survey_id
+    survey = db.query(Survey).filter(
+        Survey.id == survey_id
     ).first()
     
     if not survey:
@@ -276,8 +277,8 @@ async def get_survey_responses(
             detail="Not authorized to view responses for this survey"
         )
     
-    responses = db.query(models.SurveyResponse).filter(
-        models.SurveyResponse.survey_id == survey_id
+    responses = db.query(SurveyResponse).filter(
+        SurveyResponse.survey_id == survey_id
     ).all()
     
     return responses
