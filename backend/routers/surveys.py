@@ -252,18 +252,23 @@ async def submit_survey_response(
             detail="Survey not found"
         )
     
+    # If Firebase UID is provided but current_user is None, try to find user by firebase_uid
+    user_to_use = current_user
+    if not current_user and response.firebase_uid:
+        user_to_use = db.query(User).filter(User.firebase_uid == response.firebase_uid).first()
+    
     # Check if user is the survey creator
-    if current_user and survey.creator_id == current_user.id:
+    if user_to_use and survey.creator_id == user_to_use.id:
         raise HTTPException(
             status_code=403,
             detail="Survey creators cannot respond to their own surveys"
         )
     
     # Check if user already responded (if logged in)
-    if current_user:
+    if user_to_use:
         existing_response = db.query(SurveyResponse).filter(
             SurveyResponse.survey_id == survey_id,
-            SurveyResponse.user_id == current_user.id
+            SurveyResponse.user_id == user_to_use.id
         ).first()
         
         if existing_response:
@@ -273,11 +278,11 @@ async def submit_survey_response(
             )
     
     # Create response
-    points_earned = survey.reward_points if current_user else 0
+    points_earned = survey.reward_points if user_to_use else 0
     
     db_response = SurveyResponse(
         survey_id=survey_id,
-        user_id=current_user.id if current_user else None,
+        user_id=user_to_use.id if user_to_use else None,
         responses=response.responses,
         points_earned=points_earned
     )
@@ -288,21 +293,21 @@ async def submit_survey_response(
     survey.response_count += 1
     
     # Award points to user for responding (if logged in)
-    if current_user:
-        current_user.points += points_earned
-        current_user.experience += points_earned
+    if user_to_use:
+        user_to_use.points += points_earned
+        user_to_use.experience += points_earned
         
         # Check for rank upgrade
-        if current_user.experience >= current_user.experience_to_next:
-            current_user.experience -= current_user.experience_to_next
-            current_user.experience_to_next = int(current_user.experience_to_next * 1.5)
+        if user_to_use.experience >= user_to_use.experience_to_next:
+            user_to_use.experience -= user_to_use.experience_to_next
+            user_to_use.experience_to_next = int(user_to_use.experience_to_next * 1.5)
             
-            if current_user.rank == "Bronze" and current_user.experience_to_next >= 150:
-                current_user.rank = "Silver"
-            elif current_user.rank == "Silver" and current_user.experience_to_next >= 300:
-                current_user.rank = "Gold"
-            elif current_user.rank == "Gold" and current_user.experience_to_next >= 600:
-                current_user.rank = "Platinum"
+            if user_to_use.rank == "Bronze" and user_to_use.experience_to_next >= 150:
+                user_to_use.rank = "Silver"
+            elif user_to_use.rank == "Silver" and user_to_use.experience_to_next >= 300:
+                user_to_use.rank = "Gold"
+            elif user_to_use.rank == "Gold" and user_to_use.experience_to_next >= 600:
+                user_to_use.rank = "Platinum"
     
     db.commit()
     
@@ -336,6 +341,30 @@ async def get_survey_responses(
     ).all()
     
     return responses
+
+@router.get("/{survey_id}/check-response")
+async def check_user_response(
+    survey_id: int,
+    firebase_uid: Optional[str] = Query(None),
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: Session = Depends(get_db)
+):
+    """Check if current user has already responded to this survey"""
+    user_to_check = current_user
+    
+    # Firebase UIDが提供された場合、そのユーザーを検索
+    if not current_user and firebase_uid:
+        user_to_check = db.query(User).filter(User.firebase_uid == firebase_uid).first()
+    
+    if not user_to_check:
+        return {"has_responded": False}
+    
+    existing_response = db.query(SurveyResponse).filter(
+        SurveyResponse.survey_id == survey_id,
+        SurveyResponse.user_id == user_to_check.id
+    ).first()
+    
+    return {"has_responded": existing_response is not None}
 
 @router.get("/{survey_id}/export-csv", response_class=StreamingResponse)
 async def export_survey_csv(

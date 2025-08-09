@@ -116,7 +116,6 @@ class SurveyService:
         db.delete(survey)
         db.commit()
     
-# submit_response機能も削除 - アンケート基本機能に集中
     
     def get_survey_responses(self, db: Session, survey_id: int, current_user: User) -> List[SurveyResponse]:
         """アンケートの回答一覧を取得（作成者のみ）"""
@@ -131,6 +130,17 @@ class SurveyService:
         return db.query(SurveyResponse).filter(
             SurveyResponse.survey_id == survey_id
         ).all()
+    
+    def check_user_response(self, db: Session, survey_id: int, user_id: int) -> bool:
+        """ユーザーがアンケートに回答済みかチェック"""
+        response = db.query(SurveyResponse).filter(
+            SurveyResponse.survey_id == survey_id,
+            SurveyResponse.user_id == user_id
+        ).first()
+        
+        return response is not None
+    
+    
     
 # ハッカソン関連の複雑な機能（ポイント取引、優先度計算、ランク機能、分析機能）は削除
 # アンケート基本機能に集中
