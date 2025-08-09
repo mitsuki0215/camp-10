@@ -7,6 +7,7 @@ import ProfileEdit from './components/ProfileEdit';
 import Anq from './components/Anq';
 import AnswerSurvey from './components/AnswerSurvey';
 import SurveyResults from './components/SurveyResults';
+import Prizes from './components/Prizes';
 import SignIn from './components/SignIn';
 import Welcome from './components/Welcome';
 import PrivateRoute from './components/PrivateRoute';
@@ -52,6 +53,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <Anq />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/prizes"
+              element={
+                <PrivateRoute>
+                  <Prizes />
                 </PrivateRoute>
               }
             />
