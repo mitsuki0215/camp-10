@@ -7,21 +7,25 @@ class BaseSchema(BaseModel):
     class Config:
         from_attributes = True
 
-# ユーザー関連スキーマ
+# ユーザー関連スキーマ（Firebase Auth対応）
 class UserBase(BaseSchema):
     email: EmailStr
     name: str
     grade: Optional[str] = None
 
 class UserCreate(UserBase):
-    password: str
+    firebase_uid: str
+    avatar_url: Optional[str] = None
+    provider: str = 'firebase'
 
 class UserLogin(BaseSchema):
-    email: EmailStr
-    password: str
+    firebase_token: str  # Firebase IDToken
 
 class User(UserBase):
     id: int
+    firebase_uid: str
+    avatar_url: Optional[str] = None
+    provider: str
     is_active: bool
     is_verified: bool
     rank: str
@@ -58,7 +62,7 @@ class PasswordResetConfirm(BaseSchema):
     token: str
     new_password: str
 
-# アンケート関連スキーマ
+# アンケート関連スキーマ（ハッカソン拡張版）
 class QuestionBase(BaseSchema):
     text: str
     type: str  # 'short', 'paragraph', 'radio', 'checkbox'
@@ -88,7 +92,7 @@ class Survey(SurveyBase):
     updated_at: datetime
 
 class SurveyList(BaseSchema):
-    """アンケート一覧表示用"""
+    """アンケート一覧表示用（シンプル版）"""
     id: int
     title: str
     description: Optional[str]
@@ -96,7 +100,7 @@ class SurveyList(BaseSchema):
     duration: Optional[str] = None
     created_at: datetime
 
-# アンケート回答関連スキーマ
+# アンケート回答関連スキーマ（シンプル版）
 class SurveyResponseCreate(BaseSchema):
     responses: Dict[str, Any]  # question_id -> answer
 
@@ -106,6 +110,8 @@ class SurveyResponse(BaseSchema):
     user_id: Optional[int]
     responses: Dict[str, Any]
     created_at: datetime
+
+# ハッカソン関連機能は削除（アンケート基本機能のみ）
 
 # レスポンス用スキーマ
 class Message(BaseSchema):

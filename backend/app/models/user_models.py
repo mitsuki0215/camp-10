@@ -1,18 +1,20 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, DECIMAL
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
 
 class User(Base):
-    """ユーザーモデル"""
+    """ユーザーモデル（Firebase Auth対応）"""
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    firebase_uid = Column(String(128), unique=True, nullable=False, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
     name = Column(String, nullable=False)
     grade = Column(String, nullable=True)
-    is_active = Column(Boolean, default=False)
+    avatar_url = Column(Text, nullable=True)
+    provider = Column(String(50), nullable=False, default='firebase')
+    is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     rank = Column(String, default="Bronze")
     experience = Column(Integer, default=0)
@@ -23,8 +25,6 @@ class User(Base):
 
     # リレーション
     surveys = relationship("Survey", back_populates="creator")
-    email_verifications = relationship("EmailVerification", back_populates="user")
-    password_resets = relationship("PasswordReset", back_populates="user")
 
 class EmailVerification(Base):
     """メール認証モデル"""
@@ -37,8 +37,8 @@ class EmailVerification(Base):
     is_used = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # リレーション
-    user = relationship("User", back_populates="email_verifications")
+    # リレーション  
+    user = relationship("User")
 
 class PasswordReset(Base):
     """パスワードリセットモデル"""
@@ -52,4 +52,7 @@ class PasswordReset(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # リレーション
-    user = relationship("User", back_populates="password_resets")
+    user = relationship("User")
+
+# ハッカソン関連のモデル（PointTransaction, RankSetting, UserAuthLog）は削除
+# アンケート基本機能に集中
