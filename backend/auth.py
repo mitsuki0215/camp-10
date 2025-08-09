@@ -63,12 +63,10 @@ def verify_token(token: str, token_type: str = "access"):
     except JWTError:
         return None
 
-def authenticate_user(db: Session, email: str, password: str):
-    """Authenticate a user"""
-    user = db.query(User).filter(User.email == email).first()
+def authenticate_user(db: Session, firebase_uid: str):
+    """Authenticate a user via Firebase UID"""
+    user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
     if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
         return False
     return user
 
@@ -87,7 +85,7 @@ def get_current_user(
     if token_data is None:
         raise credentials_exception
     
-    user = db.query(User).filter(User.email == token_data.username).first()
+    user = db.query(User).filter(User.firebase_uid == token_data.username).first()
     if user is None:
         raise credentials_exception
     

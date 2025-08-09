@@ -70,7 +70,11 @@ async def create_survey(
         title=survey.title,
         description=survey.description,
         questions=questions_dict,
-        creator_id=current_user.id
+        creator_id=current_user.id,
+        required_points=getattr(survey, 'required_points', 1000),
+        reward_points=getattr(survey, 'reward_points', 50),
+        target_responses=getattr(survey, 'target_responses', 50),
+        estimated_time=getattr(survey, 'estimated_time', 5)
     )
     
     db.add(db_survey)
@@ -184,7 +188,7 @@ def get_current_user_optional(
         if token_data is None:
             return None
         
-        user = db.query(User).filter(User.email == token_data.username).first()
+        user = db.query(User).filter(User.firebase_uid == token_data.username).first()
         return user if user and user.is_active else None
     except:
         return None
@@ -222,10 +226,12 @@ async def submit_survey_response(
             )
     
     # Create response
+    points_earned = survey.reward_points if current_user else 0
     db_response = SurveyResponse(
         survey_id=survey_id,
         user_id=current_user.id if current_user else None,
-        responses=response.responses
+        responses=response.responses,
+        points_earned=points_earned
     )
     
     db.add(db_response)
@@ -235,8 +241,8 @@ async def submit_survey_response(
     
     # Award points to user for responding (if logged in)
     if current_user:
-        current_user.points += 5
-        current_user.experience += 20
+        current_user.points += points_earned
+        current_user.experience += points_earned
         
         # Check for rank upgrade
         if current_user.experience >= current_user.experience_to_next:
