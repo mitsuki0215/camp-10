@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
 import { surveyService } from '../services/surveyService';
 import './Anq.css';
@@ -13,6 +13,7 @@ const defaultQuestion = () => ({
 });
 
 const Anq = () => {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([defaultQuestion()]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -213,6 +214,9 @@ const Anq = () => {
       setEstimatedTime('');
       setQuestions([defaultQuestion()]);
       setErrors({});
+
+      // ホーム画面に遷移
+      navigate('/');
     } catch (error) {
       console.error('Failed to save survey:', error);
       alert('アンケートの保存に失敗しました');
