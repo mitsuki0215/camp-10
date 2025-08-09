@@ -1,6 +1,7 @@
 import { supabase } from '../supabase/config';
 import { auth } from '../firebase/config';
 import { userService } from './userService';
+import { api } from '../utils/api';
 
 export const surveyService = {
   /**
@@ -42,9 +43,31 @@ export const surveyService = {
   },
 
   /**
-   * ユーザーが作成したアンケートを取得
+   * ユーザーが作成したアンケートを取得（FastAPI経由）
    */
   async getUserSurveys() {
+    try {
+      const response = await api.get('/api/user/surveys', true);
+      return response.map(survey => ({
+        id: survey.id,
+        title: survey.title,
+        description: survey.description,
+        responseCount: survey.response_count,
+        createdAt: survey.created_at,
+        status: survey.is_active ? '公開中' : '終了',
+        isActive: survey.is_active
+      }));
+    } catch (error) {
+      console.error('Failed to fetch user surveys from API:', error);
+      // フォールバック：元のSupabase実装
+      return this.getUserSurveysSupabase();
+    }
+  },
+
+  /**
+   * Supabaseからユーザーのアンケートを取得（フォールバック）
+   */
+  async getUserSurveysSupabase() {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('認証されたユーザーがいません');
@@ -67,7 +90,8 @@ export const surveyService = {
         description: survey.description,
         responseCount: survey.response_count,
         createdAt: survey.created_at,
-        status: survey.is_active ? '公開中' : '終了'
+        status: survey.is_active ? '公開中' : '終了',
+        isActive: survey.is_active
       }));
     } catch (error) {
       console.error('Failed to fetch user surveys:', error);
@@ -276,5 +300,78 @@ export const surveyService = {
       console.error('Failed to fetch survey responses:', error);
       throw error;
     }
+  },
+
+  /**
+   * FastAPIからアンケート詳細を取得
+   * @param {number} surveyId - アンケートID
+   */
+  async getSurvey(surveyId) {
+    try {
+      const response = await api.get(`/api/surveys/${surveyId}`, true);
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch survey from API:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * FastAPIからアンケート回答を取得
+   * @param {number} surveyId - アンケートID
+   */
+  async getSurveyResponsesAPI(surveyId) {
+    try {
+      const response = await api.get(`/api/surveys/${surveyId}/responses`, true);
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch survey responses from API:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * アンケート公開状態を切り替え
+   * @param {number} surveyId - アンケートID
+   */
+  async toggleSurveyStatus(surveyId) {
+    try {
+      const response = await api.patch(`/api/surveys/${surveyId}/toggle-status`, null, true);
+      return response;
+    } catch (error) {
+      console.error('Failed to toggle survey status:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * アンケートを削除
+   * @param {number} surveyId - アンケートID
+   */
+  async deleteSurveyAPI(surveyId) {
+    try {
+      const response = await api.delete(`/api/surveys/${surveyId}`, true);
+      return response;
+    } catch (error) {
+      console.error('Failed to delete survey:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * アンケート結果をCSVでエクスポート
+   * @param {number} surveyId - アンケートID
+   */
+  async exportSurveyCSV(surveyId) {
+    try {
+      const blob = await api.getBlob(`/api/surveys/${surveyId}/export-csv`, true);
+      return blob;
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+      throw error;
+    }
   }
 };
+
+// 古いメソッド名で新しいAPIメソッドのエイリアスを作成
+surveyService.getSurveyResponses = surveyService.getSurveyResponsesAPI;

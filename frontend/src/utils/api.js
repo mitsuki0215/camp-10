@@ -112,6 +112,55 @@ export const apiClient = {
     
     return response.json();
   },
+
+  async patch(endpoint, data, useAuth = false) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (useAuth && auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
+        headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Failed to get Firebase token:', error);
+      }
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PATCH',
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    
+    return response.json();
+  },
+
+  async getBlob(endpoint, useAuth = false) {
+    const headers = {};
+
+    if (useAuth && auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
+        headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Failed to get Firebase token:', error);
+      }
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'GET',
+      headers,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.blob();
+  },
 };
 
+// apiエイリアスを追加
+export const api = apiClient;
 export default apiClient;

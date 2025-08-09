@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import csv
+import io
 from app.models.user_models import User
 from app.models.survey_models import Survey, SurveyResponse
 from app.models.schemas import SurveyList, Survey as SurveySchema, SurveyCreate, SurveyUpdate, SurveyResponseCreate, SurveyResponse as SurveyResponseSchema, Message
@@ -139,6 +142,43 @@ async def update_survey(
     db.refresh(survey)
     
     return survey
+
+@router.patch("/{survey_id}/toggle-status", response_model=Message)
+async def toggle_survey_status(
+    survey_id: int,
+    current_user: User = Depends(get_current_verified_user),
+    db: Session = Depends(get_db)
+):
+    """Toggle survey status (active/inactive) - only by creator"""
+    survey = db.query(Survey).filter(
+        Survey.id == survey_id
+    ).first()
+    
+    if not survey:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+    
+    if survey.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to modify this survey"
+        )
+    
+    # Toggle status
+    if survey.is_active:
+        survey.is_active = False
+        survey.status = 'completed'
+        message = "Survey ended successfully"
+    else:
+        survey.is_active = True
+        survey.status = 'active'
+        message = "Survey reactivated successfully"
+    
+    db.commit()
+    
+    return {"message": message}
 
 @router.delete("/{survey_id}", response_model=Message)
 async def delete_survey(
@@ -288,3 +328,73 @@ async def get_survey_responses(
     ).all()
     
     return responses
+
+@router.get("/{survey_id}/export-csv", response_class=StreamingResponse)
+async def export_survey_csv(
+    survey_id: int,
+    current_user: User = Depends(get_current_verified_user),
+    db: Session = Depends(get_db)
+):
+    """Export survey responses as CSV (only by survey creator)"""
+    survey = db.query(Survey).filter(
+        Survey.id == survey_id
+    ).first()
+    
+    if not survey:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+    
+    if survey.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to export responses for this survey"
+        )
+    
+    responses = db.query(SurveyResponse).filter(
+        SurveyResponse.survey_id == survey_id
+    ).all()
+    
+    # Create CSV content
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Get question texts from survey
+    questions = survey.questions
+    headers = ['Response ID', 'User ID', 'Created At']
+    
+    # Add question headers
+    for i, question in enumerate(questions):
+        headers.append(f"Q{i+1}: {question.get('text', 'Question')[:50]}")
+    
+    writer.writerow(headers)
+    
+    # Write response data
+    for response in responses:
+        row = [
+            response.id,
+            response.user_id or 'Anonymous',
+            response.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        ]
+        
+        # Add response answers
+        response_data = response.responses
+        for i, question in enumerate(questions):
+            question_key = str(i)
+            answer = response_data.get(question_key, '')
+            if isinstance(answer, list):
+                answer = ', '.join(map(str, answer))
+            row.append(str(answer))
+        
+        writer.writerow(row)
+    
+    # Prepare response
+    output.seek(0)
+    filename = f"survey_{survey_id}_{survey.title.replace(' ', '_')}_responses.csv"
+    
+    return StreamingResponse(
+        io.StringIO(output.getvalue()),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
