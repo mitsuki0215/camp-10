@@ -21,8 +21,49 @@ const Profile = () => {
         setUserStats(stats);
 
         // 自分が作成したアンケートを取得
-        const surveysData = await surveyService.getUserSurveys();
-        setMyPosts(surveysData);
+        try {
+          const surveysData = await surveyService.getUserSurveys();
+          setMyPosts(surveysData);
+        } catch (apiError) {
+          console.log('API failed, trying Supabase fallback:', apiError.message);
+          // フォールバック：Supabase直接取得
+          try {
+            const surveysData = await surveyService.getUserSurveysSupabase();
+            setMyPosts(surveysData);
+          } catch (supabaseError) {
+            console.error('Both API and Supabase failed:', supabaseError);
+            // ダミーデータを表示
+            setMyPosts([
+              {
+                id: 1,
+                title: "大学生のアルバイト事情について",
+                description: "大学生のアルバイトの実態調査",
+                responseCount: 34,
+                createdAt: "2024-07-15",
+                status: "公開中",
+                isActive: true
+              },
+              {
+                id: 2,
+                title: "オンライン授業の満足度調査",
+                description: "オンライン授業に対する学生の意見",
+                responseCount: 28,
+                createdAt: "2024-07-10",
+                status: "公開中",
+                isActive: true
+              },
+              {
+                id: 3,
+                title: "学食利用頻度アンケート",
+                description: "学食の利用実態について",
+                responseCount: 45,
+                createdAt: "2024-07-05",
+                status: "終了",
+                isActive: false
+              }
+            ]);
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
         // フォールバック: ダミーデータを使用
@@ -80,29 +121,74 @@ const Profile = () => {
 
   // アンケート管理機能
   const handleToggleStatus = async (surveyId, currentStatus) => {
+    if (!firebaseUser) {
+      alert('ログインが必要です');
+      return;
+    }
+    
     try {
+      // API経由でステータスを変更試行
       await surveyService.toggleSurveyStatus(surveyId);
+      
       // アンケート一覧を再読み込み
       const surveysData = await surveyService.getUserSurveys();
       setMyPosts(surveysData);
+      
       alert(currentStatus ? 'アンケートを終了しました' : 'アンケートを再開しました');
-    } catch (error) {
-      console.error('Failed to toggle survey status:', error);
-      alert('ステータスの変更に失敗しました');
+    } catch (apiError) {
+      console.log('API toggle failed, trying Supabase direct update:', apiError.message);
+      
+      // フォールバック：Supabase直接更新
+      try {
+        await surveyService.updateSurvey(surveyId, {
+          is_active: !currentStatus,
+          status: currentStatus ? 'completed' : 'active'
+        });
+        
+        // アンケート一覧を再読み込み
+        const surveysData = await surveyService.getUserSurveysSupabase();
+        setMyPosts(surveysData);
+        
+        alert(currentStatus ? 'アンケートを終了しました' : 'アンケートを再開しました');
+      } catch (supabaseError) {
+        console.error('Both API and Supabase toggle failed:', supabaseError);
+        alert('ステータスの変更に失敗しました: ' + supabaseError.message);
+      }
     }
   };
 
   const handleDeleteSurvey = async (surveyId, surveyTitle) => {
+    if (!firebaseUser) {
+      alert('ログインが必要です');
+      return;
+    }
+    
     if (window.confirm(`「${surveyTitle}」を削除しますか？この操作は取り消せません。`)) {
       try {
+        // API経由で削除試行
         await surveyService.deleteSurveyAPI(surveyId);
+        
         // アンケート一覧を再読み込み
         const surveysData = await surveyService.getUserSurveys();
         setMyPosts(surveysData);
+        
         alert('アンケートを削除しました');
-      } catch (error) {
-        console.error('Failed to delete survey:', error);
-        alert('削除に失敗しました');
+      } catch (apiError) {
+        console.log('API delete failed, trying Supabase direct delete:', apiError.message);
+        
+        // フォールバック：Supabase直接削除
+        try {
+          await surveyService.deleteSurvey(surveyId);
+          
+          // アンケート一覧を再読み込み
+          const surveysData = await surveyService.getUserSurveysSupabase();
+          setMyPosts(surveysData);
+          
+          alert('アンケートを削除しました');
+        } catch (supabaseError) {
+          console.error('Both API and Supabase delete failed:', supabaseError);
+          alert('削除に失敗しました: ' + supabaseError.message);
+        }
       }
     }
   };
@@ -190,12 +276,22 @@ const Profile = () => {
         <div className="my-surveys-list">
           {myPosts.map(post => (
             <div key={post.id} className="my-survey-card">
+              {/* 削除ボタンを右上に配置 */}
+              <button 
+                className="delete-btn-top"
+                onClick={() => handleDeleteSurvey(post.id, post.title)}
+                title="削除"
+              >
+                ×
+              </button>
+              
               <div className="survey-status">
                 <span className={`status-badge ${post.status === '公開中' ? 'active' : 'inactive'}`}>
                   {post.status}
                 </span>
                 <span className="created-date">{post.createdAt}</span>
               </div>
+              
               <div className="survey-content">
                 <h3 className="survey-title">{post.title}</h3>
                 <p className="survey-description">{post.description}</p>
@@ -205,24 +301,21 @@ const Profile = () => {
                   </span>
                 </div>
               </div>
+              
               <div className="survey-actions">
                 <Link 
                   to={`/survey-results/${post.id}`}
-                  className="view-results-btn"
+                  className="action-btn view-results-btn"
                 >
                   📊 結果を見る
                 </Link>
+                
+                {/* 公開/終了ボタンをステータスに応じて表示 */}
                 <button 
-                  className="publish-toggle-btn"
-                  onClick={() => handleToggleStatus(post.id, post.isActive)}
+                  className={`action-btn toggle-btn ${post.status === '公開中' ? 'end-btn' : 'start-btn'}`}
+                  onClick={() => handleToggleStatus(post.id, post.isActive || (post.status === '公開中'))}
                 >
-                  {post.status === '公開中' ? '🚫 公開終了' : '▶️ 公開開始'}
-                </button>
-                <button 
-                  className="delete-survey-btn"
-                  onClick={() => handleDeleteSurvey(post.id, post.title)}
-                >
-                  🗑️ 削除
+                  {post.status === '公開中' ? '🔒 公開終了' : '▶️ 公開開始'}
                 </button>
               </div>
             </div>

@@ -105,10 +105,10 @@ export const apiClient = {
       headers,
     });
     
-    // if (!response.ok) {
-    //   const errorData = await response.json().catch(() => ({}));
-    //   throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
-    // }
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+      throw new Error(`${errorData.detail || errorData.message || `HTTP error! status: ${response.status}`}`);
+    }
     
     return response.json();
   },
@@ -132,6 +132,11 @@ export const apiClient = {
       headers,
       body: data ? JSON.stringify(data) : undefined,
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+      throw new Error(`${errorData.detail || errorData.message || `HTTP error! status: ${response.status}`}`);
+    }
     
     return response.json();
   },

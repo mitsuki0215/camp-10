@@ -330,6 +330,36 @@ export const surveyService = {
   },
 
   /**
+   * ユーザーがアンケートに回答済みかチェック
+   * @param {number} surveyId - アンケートID  
+   */
+  async checkUserResponse(surveyId) {
+    try {
+      const user = auth.currentUser;
+      if (!user) return false;
+
+      // SupabaseのユーザーIDを取得
+      const supabaseUser = await userService.getUserByFirebaseUid(user.uid);
+      if (!supabaseUser) return false;
+
+      // 回答の存在確認
+      const { data, error } = await supabase
+        .from('survey_responses')
+        .select('id')
+        .eq('survey_id', surveyId)
+        .eq('user_id', supabaseUser.id)
+        .limit(1);
+
+      if (error) throw error;
+
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Failed to check user response:', error);
+      return false;
+    }
+  },
+
+  /**
    * CSVデータを生成（Supabaseデータから）
    * @param {number} surveyId - アンケートID
    */

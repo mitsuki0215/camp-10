@@ -11,6 +11,7 @@ const AnswerSurvey = () => {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
+  const [hasResponded, setHasResponded] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -24,8 +25,15 @@ const AnswerSurvey = () => {
         setSurvey(surveyData);
         
         // 現在のユーザーがアンケート作成者かチェック
-        if (supabaseUser && surveyData.creator_id === supabaseUser.id) {
+        const userIsCreator = supabaseUser && surveyData.creator_id === supabaseUser.id;
+        if (userIsCreator) {
           setIsCreator(true);
+        }
+
+        // ユーザーが既に回答済みかチェック（作成者でない場合）
+        if (supabaseUser && !userIsCreator) {
+          const hasUserResponded = await surveyService.checkUserResponse(id);
+          setHasResponded(hasUserResponded);
         }
         
       } catch (error) {
@@ -76,14 +84,22 @@ const AnswerSurvey = () => {
     }
 
     // 必須項目のチェック
-    const requiredQuestions = survey?.questions.filter(q => q.required) || [];
-    const missingAnswers = requiredQuestions.filter(q => !answers[q.id] || 
-      (Array.isArray(answers[q.id]) && answers[q.id].length === 0) ||
-      answers[q.id] === ''
-    );
+    const missingAnswers = [];
+    survey?.questions.forEach((question, index) => {
+      if (question.required) {
+        const answer = answers[index];
+        if (!answer || 
+            (Array.isArray(answer) && answer.length === 0) ||
+            answer === '' ||
+            (typeof answer === 'string' && answer.trim() === '')) {
+          missingAnswers.push({ question: question.text, index: index + 1 });
+        }
+      }
+    });
 
     if (missingAnswers.length > 0) {
-      alert('必須項目に回答してください。');
+      const missingQuestionNumbers = missingAnswers.map(item => `質問${item.index}`).join('、');
+      alert(`以下の必須項目に回答してください：\n${missingQuestionNumbers}`);
       return;
     }
 
@@ -129,6 +145,36 @@ const AnswerSurvey = () => {
       <div className="answer-survey-container">
         <div className="error-message">アンケートが見つかりません</div>
         <Link to="/" className="back-home-btn">ホームに戻る</Link>
+      </div>
+    );
+  }
+
+  // 回答済みの場合の表示
+  if (hasResponded) {
+    return (
+      <div className="answer-survey-container">
+        <div className="answer-header">
+          <Link to="/" className="back-button">
+            ← ホームに戻る
+          </Link>
+          <h1 className="page-title">アンケート詳細</h1>
+        </div>
+        
+        <div className="survey-info">
+          <h2 className="survey-title">{survey.title}</h2>
+          <p className="survey-description">{survey.description}</p>
+        </div>
+        
+        <div className="already-responded">
+          <h3>✅ 回答済みです</h3>
+          <p>このアンケートには既に回答済みです。</p>
+          <p>ご協力ありがとうございました！</p>
+          <div className="responded-actions">
+            <Link to="/" className="back-home-btn">
+              他のアンケートを見る
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
