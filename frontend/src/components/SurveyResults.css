@@ -266,6 +266,92 @@
   color: #dc2626;
 }
 
+/* Supabaseデータ表示スタイル */
+.raw-responses-section {
+  margin-top: 40px;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.section-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.responses-table {
+  overflow-x: auto;
+}
+
+.responses-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.responses-data-table th {
+  background: #f8fafc;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.responses-data-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.responses-data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.user-id {
+  display: block;
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.response-data {
+  max-width: 300px;
+}
+
+.response-data details {
+  cursor: pointer;
+}
+
+.response-data summary {
+  color: #6366f1;
+  font-weight: 500;
+  padding: 4px 0;
+}
+
+.response-data summary:hover {
+  color: #4f46e5;
+}
+
+.json-data {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 @media (max-width: 768px) {
   .results-container {
     padding: 15px;
@@ -289,5 +375,18 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+  }
+  
+  .responses-data-table {
+    font-size: 12px;
+  }
+  
+  .responses-data-table th,
+  .responses-data-table td {
+    padding: 8px 4px;
+  }
+  
+  .response-data {
+    max-width: 200px;
   }
 }

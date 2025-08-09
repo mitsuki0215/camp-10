@@ -15,17 +15,14 @@ const SurveyResults = () => {
       try {
         setLoading(true);
         
-        // アンケート詳細を取得
-        const surveyData = await surveyService.getSurvey(surveyId);
-        setSurvey(surveyData);
-        
-        // 回答データを取得
-        const responsesData = await surveyService.getSurveyResponsesAPI(surveyId);
-        setResponses(responsesData);
+        // Supabaseからアンケートと回答データを取得
+        const result = await surveyService.getSurveyResponses(surveyId);
+        setSurvey(result.survey);
+        setResponses(result.responses);
         
       } catch (error) {
         console.error('Failed to fetch survey results:', error);
-        setError('アンケート結果の取得に失敗しました');
+        setError('アンケート結果の取得に失敗しました: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -38,13 +35,14 @@ const SurveyResults = () => {
 
   const handleExportCSV = async () => {
     try {
-      const csvBlob = await surveyService.exportSurveyCSV(surveyId);
+      // SupabaseデータからCSVを生成
+      const csvBlob = await surveyService.exportSurveyCSVFromSupabase(surveyId);
       
       // CSVファイルをダウンロード
       const link = document.createElement('a');
       const url = URL.createObjectURL(csvBlob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `survey_${surveyId}_results.csv`);
+      link.setAttribute('download', `survey_${surveyId}_${survey?.title || 'results'}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -52,7 +50,7 @@ const SurveyResults = () => {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to export CSV:', error);
-      alert('CSV出力に失敗しました');
+      alert('CSV出力に失敗しました: ' + error.message);
     }
   };
 
@@ -207,8 +205,8 @@ const SurveyResults = () => {
           </div>
           <div className="stat-item">
             <span className="stat-label">ステータス</span>
-            <span className={`status-badge ${survey.is_active ? 'active' : 'inactive'}`}>
-              {survey.is_active ? '公開中' : '終了'}
+            <span className="stat-value">
+              Supabaseデータ
             </span>
           </div>
         </div>
@@ -223,11 +221,54 @@ const SurveyResults = () => {
             <p>まだ回答がありません</p>
           </div>
         ) : (
-          <div className="questions-analysis">
-            {analysis && Object.entries(analysis).map(([questionKey, data]) => 
-              renderQuestionAnalysis(questionKey, data)
-            )}
-          </div>
+          <>
+            <div className="questions-analysis">
+              {analysis && Object.entries(analysis).map(([questionKey, data]) => 
+                renderQuestionAnalysis(questionKey, data)
+              )}
+            </div>
+            
+            {/* Supabaseの生データ表示 */}
+            <div className="raw-responses-section">
+              <h3 className="section-subtitle">回答データ一覧 (Supabase)</h3>
+              <div className="responses-table">
+                <table className="responses-data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>ユーザー</th>
+                      <th>回答日時</th>
+                      <th>回答データ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {responses.map((response, index) => (
+                      <tr key={response.id || index}>
+                        <td>{response.id}</td>
+                        <td>
+                          {response.users?.name || '匿名'}
+                          {response.user_id && (
+                            <small className="user-id">ID: {response.user_id}</small>
+                          )}
+                        </td>
+                        <td>
+                          {new Date(response.created_at).toLocaleString('ja-JP')}
+                        </td>
+                        <td className="response-data">
+                          <details>
+                            <summary>詳細を表示</summary>
+                            <pre className="json-data">
+                              {JSON.stringify(response.responses, null, 2)}
+                            </pre>
+                          </details>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>

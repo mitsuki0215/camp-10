@@ -279,7 +279,7 @@ export const surveyService = {
   },
 
   /**
-   * アンケートの回答結果を取得
+   * アンケートの回答結果を取得（Supabase直接）
    * @param {number} surveyId - アンケートID
    */
   async getSurveyResponses(surveyId) {
@@ -294,7 +294,7 @@ export const surveyService = {
       // まず、このアンケートが自分のものかチェック
       const { data: survey, error: surveyError } = await supabase
         .from('surveys')
-        .select('creator_id')
+        .select('creator_id, title, description, questions')
         .eq('id', surveyId)
         .single();
 
@@ -306,15 +306,99 @@ export const surveyService = {
       // 回答データを取得
       const { data, error } = await supabase
         .from('survey_responses')
-        .select('*')
+        .select(`
+          id,
+          survey_id,
+          user_id,
+          responses,
+          created_at,
+          users(name, email)
+        `)
         .eq('survey_id', surveyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      return data;
+      return {
+        survey: survey,
+        responses: data || []
+      };
     } catch (error) {
       console.error('Failed to fetch survey responses:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * CSVデータを生成（Supabaseデータから）
+   * @param {number} surveyId - アンケートID
+   */
+  async exportSurveyCSVFromSupabase(surveyId) {
+    try {
+      const result = await this.getSurveyResponses(surveyId);
+      const { survey, responses } = result;
+      
+      if (!responses || responses.length === 0) {
+        throw new Error('エクスポートする回答データがありません');
+      }
+
+      // CSVヘッダーを作成
+      const headers = ['Response ID', 'User ID', 'User Name', 'Created At'];
+      
+      // 質問ヘッダーを追加
+      if (survey.questions && Array.isArray(survey.questions)) {
+        survey.questions.forEach((question, index) => {
+          const questionText = question.text || question.title || `Question ${index + 1}`;
+          headers.push(`Q${index + 1}: ${questionText.slice(0, 50)}`);
+        });
+      }
+
+      // CSV行を作成
+      const csvRows = [headers];
+      
+      responses.forEach(response => {
+        const row = [
+          response.id,
+          response.user_id || 'Anonymous',
+          response.users?.name || 'Anonymous',
+          new Date(response.created_at).toLocaleString('ja-JP')
+        ];
+        
+        // 回答データを追加
+        if (survey.questions && Array.isArray(survey.questions)) {
+          survey.questions.forEach((question, index) => {
+            const answerKey = index.toString();
+            const answer = response.responses?.[answerKey] || '';
+            
+            if (Array.isArray(answer)) {
+              row.push(answer.join(', '));
+            } else {
+              row.push(String(answer));
+            }
+          });
+        }
+        
+        csvRows.push(row);
+      });
+
+      // CSV文字列を生成
+      const csvContent = csvRows.map(row => 
+        row.map(cell => {
+          // セル内にカンマや改行がある場合はダブルクォートで囲む
+          const cellStr = String(cell);
+          if (cellStr.includes(',') || cellStr.includes('\n') || cellStr.includes('"')) {
+            return '"' + cellStr.replace(/"/g, '""') + '"';
+          }
+          return cellStr;
+        }).join(',')
+      ).join('\n');
+
+      // BOMを付けてUTF-8でエンコード
+      const bom = '\uFEFF';
+      return new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+    } catch (error) {
+      console.error('Failed to export CSV from Supabase:', error);
       throw error;
     }
   },
@@ -390,5 +474,5 @@ export const surveyService = {
   }
 };
 
-// 古いメソッド名で新しいAPIメソッドのエイリアスを作成
-surveyService.getSurveyResponses = surveyService.getSurveyResponsesAPI;
+// Note: getSurveyResponses uses direct Supabase access for profile results
+// getSurveyResponsesAPI uses FastAPI for other purposes
