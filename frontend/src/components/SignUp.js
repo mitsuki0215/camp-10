@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { apiClient } from '../utils/api';
+import { signInWithGoogle, signUpWithEmail } from '../firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    grade: '',
     password: ''
   });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -18,26 +19,45 @@ const SignUp = () => {
     });
   };
 
+  const handleGoogleSignUp = async () => {
+    setLoading(true);
+    setMessage('');
+
+    try {
+      await signInWithGoogle();
+      setMessage('Googleアカウントでの登録成功！');
+      
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+      
+    } catch (error) {
+      setMessage(`エラー: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
     try {
-      const response = await apiClient.post('/auth/register', formData);
+      await signUpWithEmail(formData.email, formData.password, formData.name);
       setMessage(`
-        ✅ 登録申請完了！
+        ✅ 登録完了！
         
         ${formData.email} 宛に認証メールを送信しました。
         
-        メール内のリンクをクリックして、アカウント作成を完了してください。
-        クリックすると自動的にログインされ、サービスをご利用いただけます。
+        メール内のリンクをクリックして、メールアドレスを確認してください。
+        確認後、サービスをご利用いただけます。
         
         ※ メールが届かない場合は迷惑メールフォルダをご確認ください。
       `);
-      setFormData({ email: '', name: '', grade: '', password: '' });
+      setFormData({ email: '', name: '', password: '' });
     } catch (error) {
-      setMessage(`エラー: ${error.response?.data?.detail || error.message}`);
+      setMessage(`エラー: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -58,6 +78,30 @@ const SignUp = () => {
           {message}
         </div>
       )}
+      
+      {/* Googleサインアップボタン */}
+      <div style={{ marginBottom: '20px' }}>
+        <button 
+          onClick={handleGoogleSignUp} 
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: '#4285f4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '16px'
+          }}
+        >
+          {loading ? 'Googleで登録中...' : 'Googleで登録'}
+        </button>
+      </div>
+      
+      <div style={{ textAlign: 'center', margin: '20px 0' }}>
+        <span>または</span>
+      </div>
       
       <form onSubmit={handleSubmit}>
         <div>
@@ -83,16 +127,6 @@ const SignUp = () => {
         </div>
         
         <div>
-          <label>学年:</label>
-          <input
-            type="text"
-            name="grade"
-            value={formData.grade}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div>
           <label>パスワード:</label>
           <input
             type="password"
@@ -104,7 +138,7 @@ const SignUp = () => {
         </div>
         
         <button type="submit" disabled={loading}>
-          {loading ? '登録中...' : '登録'}
+          {loading ? '登録中...' : 'メールで登録'}
         </button>
       </form>
       
