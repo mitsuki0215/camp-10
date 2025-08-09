@@ -8,6 +8,7 @@
   --text-dark: #1e293b;
   --text-gray: #64748b;
   --border-light: #e2e8f0;
+  --success-green: #10b981;       /* 成功の緑 */
 }
 
 .home-container {
@@ -236,6 +237,11 @@
 .response-count::before {
   content: "👥";
   margin-right: 0.25rem;
+}
+
+.response-count.target-achieved {
+  color: var(--success-green);
+  font-weight: 600;
 }
 
 .duration {
