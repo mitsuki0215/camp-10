@@ -7,6 +7,7 @@ import ProfileEdit from './components/ProfileEdit';
 import Anq from './components/Anq';
 import AnswerSurvey from './components/AnswerSurvey';
 import SignIn from './components/SignIn';
+import Welcome from './components/Welcome';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
@@ -16,6 +17,8 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+            {/* パブリックページ */}
+            <Route path="/welcome" element={<Welcome />} />
             <Route path="/signin" element={<SignIn />} />
 
             {/* ログイン必須ページ */}
