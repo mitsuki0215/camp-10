@@ -78,6 +78,35 @@ const Profile = () => {
   // 経験値の進捗率を計算
   const experienceProgress = (displayUser.experience / displayUser.experience_to_next) * 100;
 
+  // アンケート管理機能
+  const handleToggleStatus = async (surveyId, currentStatus) => {
+    try {
+      await surveyService.toggleSurveyStatus(surveyId);
+      // アンケート一覧を再読み込み
+      const surveysData = await surveyService.getUserSurveys();
+      setMyPosts(surveysData);
+      alert(currentStatus ? 'アンケートを終了しました' : 'アンケートを再開しました');
+    } catch (error) {
+      console.error('Failed to toggle survey status:', error);
+      alert('ステータスの変更に失敗しました');
+    }
+  };
+
+  const handleDeleteSurvey = async (surveyId, surveyTitle) => {
+    if (window.confirm(`「${surveyTitle}」を削除しますか？この操作は取り消せません。`)) {
+      try {
+        await surveyService.deleteSurveyAPI(surveyId);
+        // アンケート一覧を再読み込み
+        const surveysData = await surveyService.getUserSurveys();
+        setMyPosts(surveysData);
+        alert('アンケートを削除しました');
+      } catch (error) {
+        console.error('Failed to delete survey:', error);
+        alert('削除に失敗しました');
+      }
+    }
+  };
+
   // ランクに応じた色を取得
   const getRankColor = (rank) => {
     switch (rank) {
@@ -177,11 +206,24 @@ const Profile = () => {
                 </div>
               </div>
               <div className="survey-actions">
-                <button className="view-results-btn">結果を見る</button>
-                <button className="publish-toggle-btn">
-                  {post.status === '公開中' ? '公開終了' : '公開開始'}
+                <Link 
+                  to={`/survey-results/${post.id}`}
+                  className="view-results-btn"
+                >
+                  📊 結果を見る
+                </Link>
+                <button 
+                  className="publish-toggle-btn"
+                  onClick={() => handleToggleStatus(post.id, post.isActive)}
+                >
+                  {post.status === '公開中' ? '🚫 公開終了' : '▶️ 公開開始'}
                 </button>
-                <button className="delete-survey-btn">削除</button>
+                <button 
+                  className="delete-survey-btn"
+                  onClick={() => handleDeleteSurvey(post.id, post.title)}
+                >
+                  🗑️ 削除
+                </button>
               </div>
             </div>
           ))}
