@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { apiClient } from '../utils/api';
+import { surveyService } from '../services/surveyService';
 import './Home.css';
 
 const Home = () => {
@@ -12,7 +12,7 @@ const Home = () => {
     const fetchSurveys = async () => {
       try {
         setLoading(true);
-        const data = await apiClient.get('/api/surveys');
+        const data = await surveyService.getSurveys();
         setSurveys(data);
       } catch (err) {
         console.error('Failed to fetch surveys:', err);

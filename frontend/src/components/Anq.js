@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
-import { apiClient } from '../utils/api';
+import { surveyService } from '../services/surveyService';
 import './Anq.css';
 
 const defaultQuestion = () => ({
@@ -66,11 +66,7 @@ const Anq = () => {
     }));
   };
 
-  // アンケート投稿処理（仮実装）
-  const handleSubmit = () => {
-    alert('アンケートが投稿されました！');
-    console.log('投稿データ:', questions);
-  };
+
 
   // アンケートを保存
   const saveSurvey = async () => {
@@ -92,7 +88,7 @@ const Anq = () => {
         }))
       };
 
-      await apiClient.post('/api/surveys', surveyData);
+      await surveyService.createSurvey(surveyData);
       alert('アンケートが保存されました！');
 
       // フォームをリセット
@@ -217,10 +213,14 @@ const Anq = () => {
         <Link to="/" className="cancel-btn">
           キャンセル
         </Link>
-        <button className="submit-btn" onClick={handleSubmit}>
-          アンケート投稿
-        </button>
-      </div>
+
+        <button 
+          className="submit-btn" 
+          onClick={saveSurvey}
+          disabled={saving}
+        >
+          {saving ? '保存中...' : 'アンケート保存'}
+
 
       {/* 元の保存ボタン（コメントアウト済み）
       <div className="survey-actions">

@@ -11,10 +11,8 @@ load_dotenv()
 # 開発中はローカルのPostgreSQL、デプロイ時はSupabaseを使用
 # 環境変数 DEVELOPMENT=True が設定されている場合 (例: uvicornの起動時に DEVELOPMENT=True uvicorn main:app)
 # あるいは .env ファイルに DEVELOPMENT=True がある場合
-if os.getenv("DEVELOPMENT") == "True":
-    DATABASE_URL = os.getenv("DATABASE_URL_LOCAL")
-else:
-    DATABASE_URL = os.getenv("DATABASE_URL_SUPABASE")
+
+DATABASE_URL = os.getenv("DATABASE_URL_SUPABASE")
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL_LOCAL or DATABASE_URL_SUPABASE is not set in .env or environment variables.")

@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { apiClient } from '../utils/api';
+import { surveyService } from '../services/surveyService';
+import { userService } from '../services/userService';
+import { useAuth } from '../contexts/AuthContext';
 import './Profile.css';
 
 const Profile = () => {
-  const [user, setUser] = useState({
-    name: "田中 太郎",
-    grade: "B3",
-    rank: "Silver",
-    experience: 1250,
-    experienceToNext: 1500,
-    points: 340
-  });
+  const { user: firebaseUser, supabaseUser } = useAuth();
+  const [userStats, setUserStats] = useState(null);
   const [myPosts, setMyPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,12 +15,13 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        // ユーザー情報を取得
-        // const userData = await apiClient.get('/api/user/profile');
-        // setUser(userData);
+        
+        // ユーザーの統計情報を取得
+        const stats = await userService.getUserStats();
+        setUserStats(stats);
 
         // 自分が作成したアンケートを取得
-        const surveysData = await apiClient.get('/api/user/surveys');
+        const surveysData = await surveyService.getUserSurveys();
         setMyPosts(surveysData);
       } catch (error) {
         console.error('Failed to fetch user data:', error);
@@ -63,8 +60,17 @@ const Profile = () => {
     fetchUserData();
   }, []);
 
+  // ユーザー情報のフォールバック
+  const displayUser = userStats || supabaseUser || {
+    name: firebaseUser?.displayName || firebaseUser?.email?.split('@')[0] || 'ユーザー',
+    rank: 'Bronze',
+    experience: 0,
+    experience_to_next: 100,
+    points: 0
+  };
+
   // 経験値の進捗率を計算
-  const experienceProgress = (user.experience / user.experienceToNext) * 100;
+  const experienceProgress = (displayUser.experience / displayUser.experience_to_next) * 100;
 
   // ランクに応じた色を取得
   const getRankColor = (rank) => {
@@ -97,8 +103,8 @@ const Profile = () => {
         </div>
         <div className="user-details">
           <h2 className="user-name">
-            {user.name} 
-            <span className="grade-value">{user.grade}</span>
+            {displayUser.name} 
+            <span className="grade-value">{displayUser.grade || ''}</span>
           </h2>
         </div>
       </div>
@@ -106,15 +112,15 @@ const Profile = () => {
       {/* ランク・経験値セクション */}
       <div className="rank-section">
         <div className="rank-info">
-          <div className="rank-badge" style={{ borderColor: getRankColor(user.rank) }}>
+          <div className="rank-badge" style={{ borderColor: getRankColor(displayUser.rank) }}>
             <span className="rank-icon">🏆</span>
-            <span className="rank-name" style={{ color: getRankColor(user.rank) }}>
-              {user.rank}
+            <span className="rank-name" style={{ color: getRankColor(displayUser.rank) }}>
+              {displayUser.rank}
             </span>
           </div>
           <div className="experience-info">
             <div className="experience-text">
-              <span>経験値: {user.experience} / {user.experienceToNext} XP</span>
+              <span>経験値: {displayUser.experience} / {displayUser.experience_to_next} XP</span>
             </div>
             <div className="experience-bar">
               <div 
@@ -132,7 +138,7 @@ const Profile = () => {
           <div className="points-icon">💰</div>
           <div className="points-info">
             <h3>保有ポイント</h3>
-            <p className="points-value">{user.points} P</p>
+            <p className="points-value">{displayUser.points} P</p>
             <p className="points-description">アンケート作成に使用できます</p>
           </div>
         </div>
