@@ -6,9 +6,9 @@ import './Anq.css';
 
 const defaultQuestion = () => ({
   id: uuidv4(),
-  text: "質問内容を入力",
+  text: "",
   type: "short", // 'short' | 'paragraph' | 'radio' | 'checkbox'
-  options: ["選択肢1", "選択肢2"],
+  options: ["", ""],
   required: false,
 });
 
@@ -17,9 +17,9 @@ const Anq = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [requiredPoints, setRequiredPoints] = useState(1000);
-  const [targetResponses, setTargetResponses] = useState(50);
-  const [estimatedTime, setEstimatedTime] = useState(5);
+  const [requiredPoints, setRequiredPoints] = useState('');
+  const [targetResponses, setTargetResponses] = useState('');
+  const [estimatedTime, setEstimatedTime] = useState('');
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -49,7 +49,7 @@ const Anq = () => {
   const addOption = (id) => {
     setQuestions(questions.map(q => {
       if (q.id === id) {
-        return { ...q, options: [...q.options, `選択肢${q.options.length + 1}`] };
+        return { ...q, options: [...q.options, ""] };
       }
       return q;
     }));
@@ -70,7 +70,7 @@ const Anq = () => {
 
     // タイトル必須
     if (!title.trim()) {
-      newErrors.title = 'アンケートのタイトルを入力してください';
+      newErrors.title = 'アンケートタイトルを設定してください';
     }
 
     // 締切日必須
@@ -79,20 +79,83 @@ const Anq = () => {
     }
 
     // ポイントのバリデーション
-    if (requiredPoints < 1000) {
-      newErrors.requiredPoints = '最低1000ポイントが必要です';
-    } else if (requiredPoints % 100 !== 0) {
-      newErrors.requiredPoints = '100ポイント刻みで設定してください';
+    if (!requiredPoints) {
+      newErrors.requiredPoints = '使用ポイントを入力してください';
+    } else if (!/^\d+$/.test(requiredPoints)) {
+      newErrors.requiredPoints = '半角数字で設定してください';
+    } else {
+      const pointsValue = parseInt(requiredPoints) || 0;
+      if (pointsValue < 1000) {
+        newErrors.requiredPoints = '必要ポイントが足りません';
+      } else if (pointsValue % 100 !== 0) {
+        newErrors.requiredPoints = '必要ポイントは100ポイント単位で設定してください';
+      }
     }
 
-    // 回答者数必須
-    if (targetResponses < 1) {
-      newErrors.targetResponses = '1人以上の回答者数を設定してください';
+    // 回答者数のバリデーション
+    if (!targetResponses) {
+      newErrors.targetResponses = '目標回答者数を設定してください';
+    } else if (!/^\d+$/.test(targetResponses)) {
+      newErrors.targetResponses = '半角数字で設定してください';
+    } else {
+      const responsesValue = parseInt(targetResponses) || 0;
+      if (responsesValue < 1) {
+        newErrors.targetResponses = '目標回答者数を設定してください';
+      }
     }
 
-    // 推定時間必須
-    if (estimatedTime < 1) {
-      newErrors.estimatedTime = '1分以上の回答時間を設定してください';
+    // 推定時間のバリデーション
+    if (!estimatedTime) {
+      newErrors.estimatedTime = '回答時間の目安を設定してください';
+    } else if (!/^\d+$/.test(estimatedTime)) {
+      newErrors.estimatedTime = '半角数字で設定してください';
+    } else {
+      const timeValue = parseInt(estimatedTime) || 0;
+      if (timeValue < 1) {
+        newErrors.estimatedTime = '回答時間の目安を設定してください';
+      }
+    }
+
+    // 質問のバリデーション
+    if (questions.length === 0) {
+      newErrors.questions = '質問内容が一つも登録されていません';
+    } else {
+      // 各質問の内容チェック
+      const questionErrors = {};
+      questions.forEach((question, index) => {
+        const qErrors = {};
+        
+        // 質問文が空
+        if (!question.text.trim()) {
+          qErrors.text = '質問内容を入力してください';
+        }
+
+        // ラジオボタンの選択肢チェック
+        if (question.type === 'radio') {
+          if (question.options.length < 2) {
+            qErrors.options = 'ラジオボタンの選択肢を最低2つ設定してください';
+          } else if (question.options.some(opt => !opt.trim())) {
+            qErrors.options = 'ラジオボタンの選択肢が空です';
+          }
+        }
+
+        // チェックボックスの選択肢チェック
+        if (question.type === 'checkbox') {
+          if (question.options.length < 2) {
+            qErrors.options = 'チェックボックスの選択肢を最低2つ設定してください';
+          } else if (question.options.some(opt => !opt.trim())) {
+            qErrors.options = 'チェックボックスの選択肢が空です';
+          }
+        }
+
+        if (Object.keys(qErrors).length > 0) {
+          questionErrors[question.id] = qErrors;
+        }
+      });
+
+      if (Object.keys(questionErrors).length > 0) {
+        newErrors.questionErrors = questionErrors;
+      }
     }
 
     setErrors(newErrors);
@@ -101,6 +164,23 @@ const Anq = () => {
 
   const saveSurvey = async () => {
     if (!validateForm()) {
+      // エラーがある場合、最初のエラー要素までスクロール
+      setTimeout(() => {
+        const errorElements = [
+          document.querySelector('.survey-title-input.error'),
+          document.querySelector('.survey-input.error'),
+          document.querySelector('.question-input.error'),
+          document.querySelector('.general-error'),
+          document.querySelector('.error-message')
+        ].filter(Boolean);
+        
+        if (errorElements.length > 0) {
+          errorElements[0].scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 100);
       return;
     }
 
@@ -110,9 +190,9 @@ const Anq = () => {
         title: title.trim(),
         description: description.trim(),
         deadline: deadline,
-        requiredPoints: requiredPoints,
-        targetResponses: targetResponses,
-        estimatedTime: estimatedTime,
+        requiredPoints: parseInt(requiredPoints) || 0,
+        targetResponses: parseInt(targetResponses) || 0,
+        estimatedTime: parseInt(estimatedTime) || 0,
         questions: questions.map(q => ({
           text: q.text,
           type: q.type,
@@ -128,9 +208,9 @@ const Anq = () => {
       setTitle('');
       setDescription('');
       setDeadline('');
-      setRequiredPoints(1000);
-      setTargetResponses(50);
-      setEstimatedTime(5);
+      setRequiredPoints('');
+      setTargetResponses('');
+      setEstimatedTime('');
       setQuestions([defaultQuestion()]);
       setErrors({});
     } catch (error) {
@@ -154,9 +234,16 @@ const Anq = () => {
               id="survey-title"
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (errors.title && e.target.value.trim()) {
+                  const newErrors = { ...errors };
+                  delete newErrors.title;
+                  setErrors(newErrors);
+                }
+              }}
               placeholder="アンケートのタイトルを入力してください"
-              className="survey-title-input"
+              className={`survey-title-input ${errors.title ? 'error' : ''}`}
             />
             {errors.title && <span className="error-message">{errors.title}</span>}
           </div>
@@ -180,9 +267,16 @@ const Anq = () => {
                 id="survey-deadline"
                 type="datetime-local"
                 value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
+                onChange={(e) => {
+                  setDeadline(e.target.value);
+                  if (errors.deadline && e.target.value) {
+                    const newErrors = { ...errors };
+                    delete newErrors.deadline;
+                    setErrors(newErrors);
+                  }
+                }}
                 min={new Date().toISOString().slice(0, 16)}
-                className="survey-input"
+                className={`survey-input ${errors.deadline ? 'error' : ''}`}
               />
               {errors.deadline && <span className="error-message">{errors.deadline}</span>}
             </div>
@@ -191,12 +285,24 @@ const Anq = () => {
               <label htmlFor="required-points">必要ポイント *</label>
               <input
                 id="required-points"
-                type="number"
+                type="text"
                 value={requiredPoints}
-                onChange={(e) => setRequiredPoints(parseInt(e.target.value) || 0)}
-                min="1000"
-                step="100"
-                className="survey-input"
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  setRequiredPoints(inputValue);
+                  
+                  // リアルタイムでエラーをクリア
+                  if (errors.requiredPoints && inputValue && /^\d+$/.test(inputValue)) {
+                    const value = parseInt(inputValue);
+                    if (value >= 1000 && value % 100 === 0) {
+                      const newErrors = { ...errors };
+                      delete newErrors.requiredPoints;
+                      setErrors(newErrors);
+                    }
+                  }
+                }}
+                placeholder="半角数字"
+                className={`survey-input ${errors.requiredPoints ? 'error' : ''}`}
               />
               {errors.requiredPoints && <span className="error-message">{errors.requiredPoints}</span>}
             </div>
@@ -207,11 +313,24 @@ const Anq = () => {
               <label htmlFor="target-responses">目標回答者数 *</label>
               <input
                 id="target-responses"
-                type="number"
+                type="text"
                 value={targetResponses}
-                onChange={(e) => setTargetResponses(parseInt(e.target.value) || 0)}
-                min="1"
-                className="survey-input"
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  setTargetResponses(inputValue);
+                  
+                  // リアルタイムでエラーをクリア
+                  if (errors.targetResponses && inputValue && /^\d+$/.test(inputValue)) {
+                    const value = parseInt(inputValue);
+                    if (value >= 1) {
+                      const newErrors = { ...errors };
+                      delete newErrors.targetResponses;
+                      setErrors(newErrors);
+                    }
+                  }
+                }}
+                placeholder="半角数字"
+                className={`survey-input ${errors.targetResponses ? 'error' : ''}`}
               />
               {errors.targetResponses && <span className="error-message">{errors.targetResponses}</span>}
             </div>
@@ -220,24 +339,57 @@ const Anq = () => {
               <label htmlFor="estimated-time">回答時間の目安（分） *</label>
               <input
                 id="estimated-time"
-                type="number"
+                type="text"
                 value={estimatedTime}
-                onChange={(e) => setEstimatedTime(parseInt(e.target.value) || 0)}
-                min="1"
-                className="survey-input"
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  setEstimatedTime(inputValue);
+                  
+                  // リアルタイムでエラーをクリア
+                  if (errors.estimatedTime && inputValue && /^\d+$/.test(inputValue)) {
+                    const value = parseInt(inputValue);
+                    if (value >= 1) {
+                      const newErrors = { ...errors };
+                      delete newErrors.estimatedTime;
+                      setErrors(newErrors);
+                    }
+                  }
+                }}
+                placeholder="半角数字"
+                className={`survey-input ${errors.estimatedTime ? 'error' : ''}`}
               />
               {errors.estimatedTime && <span className="error-message">{errors.estimatedTime}</span>}
             </div>
           </div>
         </div>
 
+        {/* 質問一覧のエラー表示 */}
+        {errors.questions && (
+          <div className="general-error">
+            <span className="error-message">{errors.questions}</span>
+          </div>
+        )}
+
       {questions.map(q => (
-        <div key={q.id} className="question-card">
+        <div key={q.id} className={`question-card ${errors.questionErrors?.[q.id] ? 'has-error' : ''}`}>
           <div className="question-header">
             <input
-              className="question-input"
+              className={`question-input ${errors.questionErrors?.[q.id]?.text ? 'error' : ''}`}
               value={q.text}
-              onChange={e => updateQuestion(q.id, { text: e.target.value })}
+              onChange={e => {
+                updateQuestion(q.id, { text: e.target.value });
+                // エラーをクリア
+                if (errors.questionErrors?.[q.id]?.text) {
+                  const newErrors = { ...errors };
+                  if (newErrors.questionErrors?.[q.id]) {
+                    delete newErrors.questionErrors[q.id].text;
+                    if (Object.keys(newErrors.questionErrors[q.id]).length === 0) {
+                      delete newErrors.questionErrors[q.id];
+                    }
+                  }
+                  setErrors(newErrors);
+                }
+              }}
               placeholder="質問内容を入力"
             />
             <button
@@ -248,6 +400,9 @@ const Anq = () => {
               削除
             </button>
           </div>
+          {errors.questionErrors?.[q.id]?.text && (
+            <span className="error-message">{errors.questionErrors[q.id].text}</span>
+          )}
 
           <div className="question-controls">
             <select
@@ -278,6 +433,7 @@ const Anq = () => {
                     className="option-input"
                     value={opt}
                     onChange={e => updateOption(q.id, index, e.target.value)}
+                    placeholder={`選択肢${index + 1}`}
                   />
                   <button
                     className="delete-option-btn"
@@ -288,6 +444,9 @@ const Anq = () => {
                   </button>
                 </div>
               ))}
+              {errors.questionErrors?.[q.id]?.options && (
+                <span className="error-message">{errors.questionErrors[q.id].options}</span>
+              )}
               <button
                 className="add-option-btn"
                 onClick={() => addOption(q.id)}
