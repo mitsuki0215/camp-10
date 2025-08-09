@@ -100,7 +100,7 @@ export const surveyService = {
   },
 
   /**
-   * アンケートを作成
+   * アンケートを作成（FastAPI経由）
    * @param {Object} surveyData - アンケートデータ
    */
   async createSurvey(surveyData) {
@@ -108,29 +108,20 @@ export const surveyService = {
       const user = auth.currentUser;
       if (!user) throw new Error('認証されたユーザーがいません');
 
-      // SupabaseのユーザーIDを取得
-      const supabaseUser = await userService.getUserByFirebaseUid(user.uid);
-      if (!supabaseUser) throw new Error('ユーザーが見つかりません');
-
-      const { data, error } = await supabase
-        .from('surveys')
-        .insert({
-          title: surveyData.title,
-          description: surveyData.description,
-          questions: surveyData.questions,
-          creator_id: supabaseUser.id,
-          is_active: true,
-          response_count: 0
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      return data;
+      // FastAPI経由でアンケートを作成
+      const response = await api.post('/api/surveys/', surveyData, true);
+      return response;
     } catch (error) {
-      console.error('Failed to create survey:', error);
-      throw error;
+      console.error('Failed to create survey via API:', error);
+      
+      // エラーメッセージをより詳細に表示
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      } else if (error.detail) {
+        throw new Error(error.detail);
+      } else {
+        throw error;
+      }
     }
   },
 

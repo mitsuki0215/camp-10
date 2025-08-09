@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -75,6 +75,13 @@ class SurveyBase(BaseSchema):
 
 class SurveyCreate(SurveyBase):
     questions: List[QuestionBase]
+    required_points: Optional[int] = Field(default=1000, alias='requiredPoints')
+    reward_points: Optional[int] = Field(default=50, alias='rewardPoints')
+    target_responses: Optional[int] = Field(default=50, alias='targetResponses')
+    estimated_time: Optional[int] = Field(default=5, alias='estimatedTime')
+    
+    class Config:
+        populate_by_name = True  # Allow both field name and alias
 
 class SurveyUpdate(BaseSchema):
     title: Optional[str] = None

@@ -10,6 +10,8 @@ from app.models.schemas import TokenData
 from app.core.database import get_db
 import secrets
 import os
+import requests
+import json
 
 # Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
@@ -63,6 +65,51 @@ def verify_token(token: str, token_type: str = "access"):
     except JWTError:
         return None
 
+def verify_firebase_token(token: str):
+    """Verify Firebase ID token"""
+    try:
+        # Firebase公開キー取得用URL
+        FIREBASE_KEYS_URL = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+        
+        # トークンのヘッダーをデコードして kid を取得
+        try:
+            header = jwt.get_unverified_header(token)
+            kid = header.get('kid')
+            if not kid:
+                return None
+        except JWTError:
+            return None
+        
+        # Firebase公開キーを取得
+        try:
+            keys_response = requests.get(FIREBASE_KEYS_URL, timeout=5)
+            keys = keys_response.json()
+            public_key = keys.get(kid)
+            if not public_key:
+                return None
+        except (requests.RequestException, json.JSONDecodeError):
+            return None
+        
+        # トークンを検証（とりあえずaudienceとissuerのチェックをスキップ）
+        payload = jwt.decode(
+            token, 
+            public_key, 
+            algorithms=["RS256"],
+            options={"verify_aud": False, "verify_iss": False}
+        )
+        
+        # UIDを取得
+        firebase_uid = payload.get("sub")
+        if not firebase_uid:
+            return None
+            
+        return TokenData(username=firebase_uid)
+        
+    except JWTError:
+        return None
+    except Exception:
+        return None
+
 def authenticate_user(db: Session, firebase_uid: str):
     """Authenticate a user via Firebase UID"""
     user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
@@ -74,14 +121,20 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
-    """Get current authenticated user"""
+    """Get current authenticated user (supports both Firebase and JWT tokens)"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     
-    token_data = verify_token(credentials.credentials)
+    # まずFirebaseトークンとして検証を試す
+    token_data = verify_firebase_token(credentials.credentials)
+    
+    # Firebaseで失敗した場合は独自JWTとして検証
+    if token_data is None:
+        token_data = verify_token(credentials.credentials)
+    
     if token_data is None:
         raise credentials_exception
     
