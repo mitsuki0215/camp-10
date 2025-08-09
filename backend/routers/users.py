@@ -33,11 +33,16 @@ async def update_user_profile(
     return current_user
 
 @router.get("/surveys", response_model=List[SurveySchema])
-async def get_user_surveys(db: Session = Depends(get_db)):
-    """Get all surveys (no authentication required)"""
-    surveys = db.query(Survey).all()
+async def get_user_surveys(
+    current_user: User = Depends(get_current_verified_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user's created surveys"""
+    surveys = db.query(Survey).filter(
+        Survey.creator_id == current_user.id
+    ).all()
+    
     return surveys
-
 
 @router.get("/stats", response_model=dict)
 async def get_user_stats(
