@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../utils/api';
+import { surveyService } from '../services/surveyService';
 import { useAuth } from '../contexts/AuthContext';
 import { logout } from '../firebase/auth';
 import './Home.css';
@@ -9,7 +10,7 @@ const Home = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useAuth();
+  const { user, supabaseUser } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -24,7 +25,25 @@ const Home = () => {
       try {
         setLoading(true);
         const data = await apiClient.get('/api/surveys');
-        setSurveys(data);
+        
+        // ログインユーザーの場合、回答済みアンケートをフィルタリング
+        if (supabaseUser) {
+          const filteredSurveys = [];
+          for (const survey of data) {
+            const hasResponded = await surveyService.checkUserResponse(survey.id);
+            const isCreator = survey.creator_id === supabaseUser.id;
+            
+            // 作成者でなく、かつ回答済みでないアンケートのみ表示
+            if (!isCreator && !hasResponded) {
+              filteredSurveys.push(survey);
+            }
+          }
+          setSurveys(filteredSurveys);
+        } else {
+          // 未ログインの場合は全アンケートを表示
+          setSurveys(data);
+        }
+        
         setError(null); // 成功時はエラーをクリア
       } catch (err) {
         console.error('Failed to fetch surveys:', err);
@@ -43,7 +62,7 @@ const Home = () => {
     };
 
     fetchSurveys();
-  }, []);
+  }, [supabaseUser]);
 
   return (
     <div className="home-container">
