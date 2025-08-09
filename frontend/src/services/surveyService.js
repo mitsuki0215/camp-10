@@ -227,6 +227,23 @@ export const surveyService = {
    */
   async submitSurveyResponse(surveyId, responses) {
     try {
+      // FastAPI経由で回答を送信
+      const response = await api.post(`/api/surveys/${surveyId}/responses`, {
+        responses: responses
+      }, true); // 認証付きで送信
+      
+      return response;
+    } catch (error) {
+      console.error('Failed to submit survey response:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Supabase経由で回答を送信（フォールバック）
+   */
+  async submitSurveyResponseSupabase(surveyId, responses) {
+    try {
       const user = auth.currentUser;
       let userId = null;
 

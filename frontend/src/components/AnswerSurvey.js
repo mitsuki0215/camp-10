@@ -1,88 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { surveyService } from '../services/surveyService';
+import { useAuth } from '../contexts/AuthContext';
 import './AnswerSurvey.css';
 
 const AnswerSurvey = () => {
   const { id } = useParams();
+  const { user: firebaseUser, supabaseUser } = useAuth();
   const [survey, setSurvey] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isCreator, setIsCreator] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // ダミーアンケートデータ（useEffect内に移動）
-    const dummySurveys = [
-      {
-        id: 1,
-        title: "大学生活に関するアンケート",
-        description: "大学生活の満足度や改善点について教えてください",
-        questions: [
-          {
-            id: 1,
-            text: "大学生活に満足していますか？",
-            type: "radio",
-            options: ["とても満足", "満足", "どちらでもない", "不満", "とても不満"],
-            required: true
-          },
-          {
-            id: 2,
-            text: "改善してほしい点があれば教えてください",
-            type: "paragraph",
-            required: false
-          },
-          {
-            id: 3,
-            text: "利用している施設を選んでください（複数選択可）",
-            type: "checkbox",
-            options: ["図書館", "食堂", "体育館", "研究室", "サークル施設"],
-            required: false
-          },
-          {
-            id: 4,
-            text: "あなたの学年を教えてください",
-            type: "radio",
-            options: ["B1", "B2", "B3", "B4", "M1", "M2", "D1", "D2", "D3", "D4"],
-            required: true
-          }
-        ]
-      },
-      {
-        id: 2,
-        title: "オンライン授業の評価調査",
-        description: "オンライン授業の効果性や課題について",
-        questions: [
-          {
-            id: 1,
-            text: "オンライン授業の理解度はいかがですか？",
-            type: "radio",
-            options: ["とても良い", "良い", "普通", "悪い", "とても悪い"],
-            required: true
-          },
-          {
-            id: 2,
-            text: "オンライン授業で困っていることがあれば教えてください",
-            type: "paragraph",
-            required: false
-          }
-        ]
-      }
-    ];
-
-    // アンケートデータを取得（ダミーデータを使用）
     const fetchSurvey = async () => {
       try {
         setLoading(true);
-        // 実際のAPIコール: const surveyData = await apiClient.get(`/api/surveys/${id}`);
-        const surveyData = dummySurveys.find(s => s.id === parseInt(id));
+        setError('');
+        
+        // 実際のAPIからアンケートデータを取得
+        const surveyData = await surveyService.getSurvey(id);
         setSurvey(surveyData);
+        
+        // 現在のユーザーがアンケート作成者かチェック
+        if (supabaseUser && surveyData.creator_id === supabaseUser.id) {
+          setIsCreator(true);
+        }
+        
       } catch (error) {
         console.error('Failed to fetch survey:', error);
+        setError('アンケートの取得に失敗しました');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSurvey();
-  }, [id]);
+    if (id) {
+      fetchSurvey();
+    }
+  }, [id, supabaseUser]);
 
   // 回答の更新
   const handleAnswerChange = (questionId, value) => {
@@ -110,8 +67,14 @@ const AnswerSurvey = () => {
     });
   };
 
-  // アンケート回答送信（現在は仮実装）
-  const handleSubmit = () => {
+  // アンケート回答送信
+  const handleSubmit = async () => {
+    // アンケート作成者は回答できない
+    if (isCreator) {
+      alert('自分で作成したアンケートには回答できません。');
+      return;
+    }
+
     // 必須項目のチェック
     const requiredQuestions = survey?.questions.filter(q => q.required) || [];
     const missingAnswers = requiredQuestions.filter(q => !answers[q.id] || 
@@ -124,8 +87,24 @@ const AnswerSurvey = () => {
       return;
     }
 
-    alert('アンケートの回答を送信しました！');
-    // 実際の実装では、APIに回答データを送信
+    try {
+      // 回答データを質問インデックスベースに変換
+      const responseData = {};
+      survey.questions.forEach((question, index) => {
+        const answer = answers[index];
+        if (answer !== undefined && answer !== '' && !(Array.isArray(answer) && answer.length === 0)) {
+          responseData[index.toString()] = answer;
+        }
+      });
+
+      await surveyService.submitSurveyResponse(id, responseData);
+      alert('アンケートの回答を送信しました！ありがとうございました。');
+      // ホームページに戻る
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Failed to submit survey response:', error);
+      alert('回答の送信に失敗しました。もう一度お試しください。');
+    }
   };
 
   if (loading) {
@@ -136,11 +115,53 @@ const AnswerSurvey = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="answer-survey-container">
+        <div className="error-message">{error}</div>
+        <Link to="/" className="back-home-btn">ホームに戻る</Link>
+      </div>
+    );
+  }
+
   if (!survey) {
     return (
       <div className="answer-survey-container">
         <div className="error-message">アンケートが見つかりません</div>
         <Link to="/" className="back-home-btn">ホームに戻る</Link>
+      </div>
+    );
+  }
+
+  // アンケート作成者の場合の警告表示
+  if (isCreator) {
+    return (
+      <div className="answer-survey-container">
+        <div className="answer-header">
+          <Link to="/" className="back-button">
+            ← ホームに戻る
+          </Link>
+          <h1 className="page-title">アンケート詳細</h1>
+        </div>
+        
+        <div className="survey-info">
+          <h2 className="survey-title">{survey.title}</h2>
+          <p className="survey-description">{survey.description}</p>
+        </div>
+        
+        <div className="creator-warning">
+          <h3>⚠️ 作成者は回答できません</h3>
+          <p>あなたが作成したアンケートのため、回答することはできません。</p>
+          <p>結果を確認したい場合は、プロフィールページから「結果を見る」をクリックしてください。</p>
+          <div className="creator-actions">
+            <Link to="/profile" className="view-profile-btn">
+              プロフィールページを見る
+            </Link>
+            <Link to={`/survey-results/${id}`} className="view-results-btn">
+              結果を見る
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -164,7 +185,7 @@ const AnswerSurvey = () => {
       {/* 質問一覧 */}
       <div className="questions-container">
         {survey.questions.map((question, index) => (
-          <div key={question.id} className="question-card">
+          <div key={question.id || index} className="question-card">
             <div className="question-header">
               <h3 className="question-number">質問 {index + 1}</h3>
               {question.required && <span className="required-mark">必須</span>}
@@ -176,8 +197,8 @@ const AnswerSurvey = () => {
                 <input
                   type="text"
                   className="text-input"
-                  value={answers[question.id] || ''}
-                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                  value={answers[index] || ''}
+                  onChange={(e) => handleAnswerChange(index, e.target.value)}
                   placeholder="回答を入力してください"
                 />
               )}
@@ -185,8 +206,8 @@ const AnswerSurvey = () => {
               {question.type === 'paragraph' && (
                 <textarea
                   className="textarea-input"
-                  value={answers[question.id] || ''}
-                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                  value={answers[index] || ''}
+                  onChange={(e) => handleAnswerChange(index, e.target.value)}
                   placeholder="回答を入力してください"
                   rows="4"
                 />
@@ -198,10 +219,10 @@ const AnswerSurvey = () => {
                     <label key={optIndex} className="radio-option">
                       <input
                         type="radio"
-                        name={`question-${question.id}`}
+                        name={`question-${index}`}
                         value={option}
-                        checked={answers[question.id] === option}
-                        onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                        checked={answers[index] === option}
+                        onChange={(e) => handleAnswerChange(index, e.target.value)}
                       />
                       <span className="radio-text">{option}</span>
                     </label>
@@ -215,8 +236,8 @@ const AnswerSurvey = () => {
                     <label key={optIndex} className="checkbox-option">
                       <input
                         type="checkbox"
-                        checked={(answers[question.id] || []).includes(option)}
-                        onChange={(e) => handleCheckboxChange(question.id, option, e.target.checked)}
+                        checked={(answers[index] || []).includes(option)}
+                        onChange={(e) => handleCheckboxChange(index, option, e.target.checked)}
                       />
                       <span className="checkbox-text">{option}</span>
                     </label>

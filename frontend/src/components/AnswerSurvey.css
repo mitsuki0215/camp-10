@@ -15,6 +15,68 @@
   --warning-yellow: #f59e0b;
 }
 
+/* 作成者警告スタイル */
+.creator-warning {
+  background: var(--white);
+  border: 2px solid var(--warning-yellow);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+}
+
+.creator-warning h3 {
+  color: var(--warning-yellow);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.creator-warning p {
+  color: var(--text-gray);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.creator-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.view-profile-btn,
+.view-results-btn {
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.view-profile-btn {
+  background: var(--primary-purple);
+  color: var(--white);
+}
+
+.view-profile-btn:hover {
+  background: var(--accent-purple);
+  transform: translateY(-1px);
+}
+
+.view-results-btn {
+  background: var(--success-green);
+  color: var(--white);
+}
+
+.view-results-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
 .answer-survey-container {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--light-purple) 0%, var(--white) 50%, var(--light-purple) 100%);

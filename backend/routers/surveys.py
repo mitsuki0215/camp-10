@@ -252,6 +252,13 @@ async def submit_survey_response(
             detail="Survey not found"
         )
     
+    # Check if user is the survey creator
+    if current_user and survey.creator_id == current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Survey creators cannot respond to their own surveys"
+        )
+    
     # Check if user already responded (if logged in)
     if current_user:
         existing_response = db.query(SurveyResponse).filter(
@@ -267,6 +274,7 @@ async def submit_survey_response(
     
     # Create response
     points_earned = survey.reward_points if current_user else 0
+    
     db_response = SurveyResponse(
         survey_id=survey_id,
         user_id=current_user.id if current_user else None,
