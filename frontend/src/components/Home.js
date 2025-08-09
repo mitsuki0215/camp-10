@@ -1,59 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { surveyService } from '../services/surveyService';
+import { apiClient } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
+import { logout } from '../firebase/auth';
 import './Home.css';
 
 const Home = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('ログアウトエラー:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchSurveys = async () => {
       try {
         setLoading(true);
-        const data = await surveyService.getSurveys();
+        const data = await apiClient.get('/api/surveys');
         setSurveys(data);
       } catch (err) {
         console.error('Failed to fetch surveys:', err);
         setError('アンケートの読み込みに失敗しました');
-        // フォールバック: ダミーデータを使用
         setSurveys([
-          {
-            id: 1,
-            title: "大学生活に関するアンケート",
-            description: "大学生活の満足度や改善点について教えてください",
-            responseCount: 24,
-            duration: "約3分"
-          },
-          {
-            id: 2,
-            title: "オンライン授業の評価調査",
-            description: "オンライン授業の効果性や課題について",
-            responseCount: 18,
-            duration: "約5分"
-          },
-          {
-            id: 3,
-            title: "キャンパス施設利用に関するアンケート",
-            description: "図書館や食堂、体育館などの施設利用について",
-            responseCount: 42,
-            duration: "約4分"
-          },
-          {
-            id: 4,
-            title: "就職活動支援サービスについて",
-            description: "キャリア支援センターやインターンシップについて",
-            responseCount: 31,
-            duration: "約6分"
-          },
-          {
-            id: 5,
-            title: "学食メニューの改善提案",
-            description: "学食のメニューや価格についてのご意見をお聞かせください",
-            responseCount: 67,
-            duration: "約2分"
-          }
+          { id: 1, title: "大学生活に関するアンケート", description: "大学生活の満足度や改善点について教えてください", responseCount: 24, duration: "約3分" },
+          { id: 2, title: "オンライン授業の評価調査", description: "オンライン授業の効果性や課題について", responseCount: 18, duration: "約5分" },
+          { id: 3, title: "キャンパス施設利用に関するアンケート", description: "図書館や食堂、体育館などの施設利用について", responseCount: 42, duration: "約4分" },
+          { id: 4, title: "就職活動支援サービスについて", description: "キャリア支援センターやインターンシップについて", responseCount: 31, duration: "約6分" },
+          { id: 5, title: "学食メニューの改善提案", description: "学食のメニューや価格についてのご意見をお聞かせください", responseCount: 67, duration: "約2分" }
         ]);
       } finally {
         setLoading(false);
@@ -78,6 +58,11 @@ const Home = () => {
               <span>👤</span>
             </div>
           </Link>
+          {user && (
+            <button onClick={handleLogout} style={{ marginLeft: '1rem' }}>
+              ログアウト
+            </button>
+          )}
         </div>
       </div>
 

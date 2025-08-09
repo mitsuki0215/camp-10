@@ -7,29 +7,68 @@ import ProfileEdit from './components/ProfileEdit';
 import Anq from './components/Anq';
 import AnswerSurvey from './components/AnswerSurvey';
 import SignIn from './components/SignIn';
-import SignUp from './components/SignUp';
-import Navigation from './components/Navigation';
 import PrivateRoute from './components/PrivateRoute';
-import EmailVerificationSuccess from './components/EmailVerificationSuccess';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/signin" element={<SignIn />} />
 
-      <Router>
-        <Routes>
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/edit" element={<ProfileEdit />} />
-          <Route path="/anq" element={<Anq />} />
-          <Route path="/survey/:id" element={<AnswerSurvey />} />
-        </Routes>
-      </Router>
-
+            {/* ログイン必須ページ */}
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile/edit"
+              element={
+                <PrivateRoute>
+                  <ProfileEdit />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/anq"
+              element={
+                <PrivateRoute>
+                  <Anq />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/survey/:id"
+              element={
+                <PrivateRoute>
+                  <AnswerSurvey />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </Router>
+      </AuthProvider>
     </div>
   );
 }
 
 export default App;
+
+
+
+
+
