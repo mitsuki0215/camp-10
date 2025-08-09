@@ -22,10 +22,10 @@ export const apiClient = {
       headers,
     });
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json().catch(() => ({}));
+    //   throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
+    // }
     
     return response.json();
   },
@@ -50,10 +50,10 @@ export const apiClient = {
       body: JSON.stringify(data),
     });
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json().catch(() => ({}));
+    //   throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
+    // }
     
     return response.json();
   },
@@ -78,10 +78,10 @@ export const apiClient = {
       body: JSON.stringify(data),
     });
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json().catch(() => ({}));
+    //   throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
+    // }
     
     return response.json();
   },
@@ -105,10 +105,10 @@ export const apiClient = {
       headers,
     });
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json().catch(() => ({}));
+    //   throw { response: { data: errorData }, message: `HTTP error! status: ${response.status}` };
+    // }
     
     return response.json();
   },
