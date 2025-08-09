@@ -1,0 +1,283 @@
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
+from typing import List, Optional
+import models
+import schemas
+from database import get_db
+from auth import get_current_verified_user, get_current_user
+
+router = APIRouter(prefix="/api/surveys", tags=["surveys"])
+
+@router.get("/", response_model=List[schemas.SurveyList])
+async def get_surveys(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    """Get list of active surveys"""
+    surveys = db.query(models.Survey).filter(
+        models.Survey.is_active == True
+    ).offset(skip).limit(limit).all()
+    
+    # Convert to SurveyList format
+    survey_list = []
+    for survey in surveys:
+        duration = f"約{len(survey.questions) * 2}分"  # Estimate 2 minutes per question
+        survey_data = {
+            "id": survey.id,
+            "title": survey.title,
+            "description": survey.description,
+            "response_count": survey.response_count,
+            "duration": duration,
+            "created_at": survey.created_at
+        }
+        survey_list.append(schemas.SurveyList(**survey_data))
+    
+    return survey_list
+
+@router.get("/{survey_id}", response_model=schemas.Survey)
+async def get_survey(
+    survey_id: int,
+    db: Session = Depends(get_db)
+):
+    """Get a specific survey by ID"""
+    survey = db.query(models.Survey).filter(
+        models.Survey.id == survey_id,
+        models.Survey.is_active == True
+    ).first()
+    
+    if not survey:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+    
+    return survey
+
+@router.post("/", response_model=schemas.Survey)
+async def create_survey(
+    survey: schemas.SurveyCreate,
+    current_user: models.User = Depends(get_current_verified_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new survey"""
+    # Convert questions to dict format for JSON storage
+    questions_dict = [q.dict() for q in survey.questions]
+    
+    db_survey = models.Survey(
+        title=survey.title,
+        description=survey.description,
+        questions=questions_dict,
+        creator_id=current_user.id
+    )
+    
+    db.add(db_survey)
+    db.commit()
+    db.refresh(db_survey)
+    
+    # Award points to user for creating survey
+    current_user.points += 10
+    current_user.experience += 50
+    
+    # Check for rank upgrade
+    if current_user.experience >= current_user.experience_to_next:
+        current_user.experience -= current_user.experience_to_next
+        current_user.experience_to_next = int(current_user.experience_to_next * 1.5)
+        
+        # Simple rank system
+        if current_user.rank == "Bronze" and current_user.experience_to_next >= 150:
+            current_user.rank = "Silver"
+        elif current_user.rank == "Silver" and current_user.experience_to_next >= 300:
+            current_user.rank = "Gold"
+        elif current_user.rank == "Gold" and current_user.experience_to_next >= 600:
+            current_user.rank = "Platinum"
+    
+    db.commit()
+    
+    return db_survey
+
+@router.put("/{survey_id}", response_model=schemas.Survey)
+async def update_survey(
+    survey_id: int,
+    survey_update: schemas.SurveyUpdate,
+    current_user: models.User = Depends(get_current_verified_user),
+    db: Session = Depends(get_db)
+):
+    """Update a survey (only by creator)"""
+    survey = db.query(models.Survey).filter(
+        models.Survey.id == survey_id
+    ).first()
+    
+    if not survey:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+    
+    if survey.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to update this survey"
+        )
+    
+    # Update fields
+    update_data = survey_update.dict(exclude_unset=True)
+    
+    if "questions" in update_data:
+        update_data["questions"] = [q.dict() for q in survey_update.questions]
+    
+    for field, value in update_data.items():
+        setattr(survey, field, value)
+    
+    db.commit()
+    db.refresh(survey)
+    
+    return survey
+
+@router.delete("/{survey_id}", response_model=schemas.Message)
+async def delete_survey(
+    survey_id: int,
+    current_user: models.User = Depends(get_current_verified_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a survey (only by creator)"""
+    survey = db.query(models.Survey).filter(
+        models.Survey.id == survey_id
+    ).first()
+    
+    if not survey:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+    
+    if survey.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to delete this survey"
+        )
+    
+    # Delete associated responses first
+    db.query(models.SurveyResponse).filter(
+        models.SurveyResponse.survey_id == survey_id
+    ).delete()
+    
+    # Delete survey
+    db.delete(survey)
+    db.commit()
+    
+    return {"message": "Survey deleted successfully"}
+
+def get_current_user_optional(
+    db: Session = Depends(get_db),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
+) -> Optional[models.User]:
+    """Get current user if authenticated, otherwise return None"""
+    if not credentials:
+        return None
+    
+    try:
+        from auth import verify_token
+        token_data = verify_token(credentials.credentials)
+        if token_data is None:
+            return None
+        
+        user = db.query(models.User).filter(models.User.email == token_data.username).first()
+        return user if user and user.is_active else None
+    except:
+        return None
+
+@router.post("/{survey_id}/responses", response_model=schemas.Message)
+async def submit_survey_response(
+    survey_id: int,
+    response: schemas.SurveyResponseCreate,
+    db: Session = Depends(get_db),
+    current_user: Optional[models.User] = Depends(get_current_user_optional)
+):
+    """Submit a response to a survey"""
+    survey = db.query(models.Survey).filter(
+        models.Survey.id == survey_id,
+        models.Survey.is_active == True
+    ).first()
+    
+    if not survey:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+    
+    # Check if user already responded (if logged in)
+    if current_user:
+        existing_response = db.query(models.SurveyResponse).filter(
+            models.SurveyResponse.survey_id == survey_id,
+            models.SurveyResponse.user_id == current_user.id
+        ).first()
+        
+        if existing_response:
+            raise HTTPException(
+                status_code=400,
+                detail="You have already responded to this survey"
+            )
+    
+    # Create response
+    db_response = models.SurveyResponse(
+        survey_id=survey_id,
+        user_id=current_user.id if current_user else None,
+        responses=response.responses
+    )
+    
+    db.add(db_response)
+    
+    # Update survey response count
+    survey.response_count += 1
+    
+    # Award points to user for responding (if logged in)
+    if current_user:
+        current_user.points += 5
+        current_user.experience += 20
+        
+        # Check for rank upgrade
+        if current_user.experience >= current_user.experience_to_next:
+            current_user.experience -= current_user.experience_to_next
+            current_user.experience_to_next = int(current_user.experience_to_next * 1.5)
+            
+            if current_user.rank == "Bronze" and current_user.experience_to_next >= 150:
+                current_user.rank = "Silver"
+            elif current_user.rank == "Silver" and current_user.experience_to_next >= 300:
+                current_user.rank = "Gold"
+            elif current_user.rank == "Gold" and current_user.experience_to_next >= 600:
+                current_user.rank = "Platinum"
+    
+    db.commit()
+    
+    return {"message": "Response submitted successfully"}
+
+@router.get("/{survey_id}/responses", response_model=List[schemas.SurveyResponse])
+async def get_survey_responses(
+    survey_id: int,
+    current_user: models.User = Depends(get_current_verified_user),
+    db: Session = Depends(get_db)
+):
+    """Get responses for a survey (only by survey creator)"""
+    survey = db.query(models.Survey).filter(
+        models.Survey.id == survey_id
+    ).first()
+    
+    if not survey:
+        raise HTTPException(
+            status_code=404,
+            detail="Survey not found"
+        )
+    
+    if survey.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to view responses for this survey"
+        )
+    
+    responses = db.query(models.SurveyResponse).filter(
+        models.SurveyResponse.survey_id == survey_id
+    ).all()
+    
+    return responses
