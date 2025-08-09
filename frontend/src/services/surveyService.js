@@ -227,10 +227,18 @@ export const surveyService = {
    */
   async submitSurveyResponse(surveyId, responses) {
     try {
-      // FastAPI経由で回答を送信
-      const response = await api.post(`/api/surveys/${surveyId}/responses`, {
+      const user = auth.currentUser;
+      const requestData = {
         responses: responses
-      }, true); // 認証付きで送信
+      };
+      
+      // Firebase UIDを追加（認証済みユーザーの場合）
+      if (user) {
+        requestData.firebase_uid = user.uid;
+      }
+      
+      // FastAPI経由で回答を送信
+      const response = await api.post(`/api/surveys/${surveyId}/responses`, requestData, true); // 認証付きで送信
       
       return response;
     } catch (error) {
@@ -338,21 +346,28 @@ export const surveyService = {
       const user = auth.currentUser;
       if (!user) return false;
 
-      // SupabaseのユーザーIDを取得
-      const supabaseUser = await userService.getUserByFirebaseUid(user.uid);
-      if (!supabaseUser) return false;
+      try {
+        // まずAPIから確認（Firebase UIDも送信）
+        const response = await api.get(`/api/surveys/${surveyId}/check-response?firebase_uid=${user.uid}`, true);
+        return response.has_responded;
+      } catch (apiError) {
+        console.warn('API check failed, falling back to Supabase:', apiError);
+        
+        // APIが失敗した場合はSupabaseにフォールバック
+        const supabaseUser = await userService.getUserByFirebaseUid(user.uid);
+        if (!supabaseUser) return false;
 
-      // 回答の存在確認
-      const { data, error } = await supabase
-        .from('survey_responses')
-        .select('id')
-        .eq('survey_id', surveyId)
-        .eq('user_id', supabaseUser.id)
-        .limit(1);
+        const { data, error } = await supabase
+          .from('survey_responses')
+          .select('id')
+          .eq('survey_id', surveyId)
+          .eq('user_id', supabaseUser.id)
+          .limit(1);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      return data && data.length > 0;
+        return data && data.length > 0;
+      }
     } catch (error) {
       console.error('Failed to check user response:', error);
       return false;

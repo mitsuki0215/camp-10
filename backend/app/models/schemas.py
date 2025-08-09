@@ -103,6 +103,7 @@ class SurveyList(BaseSchema):
 # アンケート回答関連スキーマ（シンプル版）
 class SurveyResponseCreate(BaseSchema):
     responses: Dict[str, Any]  # question_id -> answer
+    firebase_uid: Optional[str] = None  # Firebase UIDを追加
 
 class SurveyResponse(BaseSchema):
     id: int
