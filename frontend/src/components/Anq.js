@@ -66,12 +66,11 @@ const Anq = () => {
     }));
   };
 
-
   // アンケート投稿処理（仮実装）
   const handleSubmit = () => {
     alert('アンケートが投稿されました！');
-    // 実際の実装では、APIにデータを送信
     console.log('投稿データ:', questions);
+  };
 
   // アンケートを保存
   const saveSurvey = async () => {
@@ -95,7 +94,7 @@ const Anq = () => {
 
       await apiClient.post('/api/surveys', surveyData);
       alert('アンケートが保存されました！');
-      
+
       // フォームをリセット
       setTitle('');
       setDescription('');
@@ -106,13 +105,12 @@ const Anq = () => {
     } finally {
       setSaving(false);
     }
-
   };
 
   return (
     <div className="anq-container">
       <h1 className="anq-title">アンケート作成</h1>
-      
+
       {/* アンケート基本情報 */}
       <div className="survey-info-section">
         <div className="input-group">
@@ -138,6 +136,7 @@ const Anq = () => {
           />
         </div>
       </div>
+
       {questions.map(q => (
         <div key={q.id} className="question-card">
           <div className="question-header">
@@ -212,7 +211,7 @@ const Anq = () => {
       >
         ＋ 質問を追加
       </button>
-      
+
       {/* アクションボタン */}
       <div className="action-buttons">
         <Link to="/" className="cancel-btn">
@@ -220,8 +219,10 @@ const Anq = () => {
         </Link>
         <button className="submit-btn" onClick={handleSubmit}>
           アンケート投稿
+        </button>
+      </div>
 
-      /* コンフリクトを起こしたのでコメントアウト措置
+      {/* 元の保存ボタン（コメントアウト済み）
       <div className="survey-actions">
         <button
           className="add-question-main-btn"
@@ -235,11 +236,9 @@ const Anq = () => {
           disabled={saving}
         >
           {saving ? '保存中...' : 'アンケートを保存'}
-
         </button>
-        */
-
       </div>
+      */}
     </div>
   );
 };
