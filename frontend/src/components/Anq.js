@@ -95,33 +95,34 @@ const Anq = () => {
 
   return (
     <div className="anq-container">
-      <h1 className="anq-title">アンケート作成</h1>
+      <div className="anq-content">
+        <h1 className="anq-title">アンケート作成</h1>
 
-      {/* アンケート基本情報 */}
-      <div className="survey-info-section">
-        <div className="input-group">
-          <label htmlFor="survey-title">アンケートタイトル *</label>
-          <input
-            id="survey-title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="アンケートのタイトルを入力してください"
-            className="survey-title-input"
-          />
+        {/* アンケート基本情報 */}
+        <div className="survey-info-section">
+          <div className="input-group">
+            <label htmlFor="survey-title">アンケートタイトル *</label>
+            <input
+              id="survey-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="アンケートのタイトルを入力してください"
+              className="survey-title-input"
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="survey-description">説明</label>
+            <textarea
+              id="survey-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="アンケートの説明を入力してください（任意）"
+              className="survey-description-input"
+              rows="3"
+            />
+          </div>
         </div>
-        <div className="input-group">
-          <label htmlFor="survey-description">説明</label>
-          <textarea
-            id="survey-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="アンケートの説明を入力してください（任意）"
-            className="survey-description-input"
-            rows="3"
-          />
-        </div>
-      </div>
 
       {questions.map(q => (
         <div key={q.id} className="question-card">
@@ -198,19 +199,20 @@ const Anq = () => {
         ＋ 質問を追加
       </button>
 
-      {/* アクションボタン */}
-      <div className="action-buttons">
-        <Link to="/" className="cancel-btn">
-          キャンセル
-        </Link>
+        {/* アクションボタン */}
+        <div className="action-buttons">
+          <Link to="/" className="cancel-btn">
+            キャンセル
+          </Link>
 
-        <button 
-          className="submit-btn" 
-          onClick={saveSurvey}
-          disabled={saving}
-        >
-          {saving ? '保存中...' : 'アンケート保存'}
-        </button>
+          <button 
+            className="submit-btn" 
+            onClick={saveSurvey}
+            disabled={saving}
+          >
+            {saving ? '保存中...' : 'アンケート保存'}
+          </button>
+        </div>
       </div>
     </div>
   );
