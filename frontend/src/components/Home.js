@@ -115,9 +115,9 @@ const Home = () => {
                 <h3 className="survey-title">{survey.title}</h3>
                 <p className="survey-description">{survey.description}</p>
                 <div className="survey-meta">
-                  <span className="points">{survey.points}P</span>
-                  <span className={`response-count ${survey.responseCount >= survey.targetResponses ? 'target-achieved' : ''}`}>
-                    {survey.responseCount}人が回答 / {survey.targetResponses}人回答希望
+                  <span className="points">{survey.reward_points ?? survey.points}P</span>
+                  <span className={`response-count ${(survey.response_count ?? survey.responseCount) >= (survey.target_responses ?? survey.targetResponses) ? 'target-achieved' : ''}`}>
+                    {survey.response_count ?? survey.responseCount}人が回答 / {survey.target_responses ?? survey.targetResponses}人回答希望
                   </span>
                   <span className="duration">{survey.duration}</span>
                 </div>
