@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../utils/api';
+import { signInWithGoogle, signInWithEmail } from '../firebase/auth';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -18,27 +18,40 @@ const SignIn = () => {
     });
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setMessage('');
+
+    try {
+      await signInWithGoogle();
+      setMessage('Googleログイン成功！');
+      
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+      
+    } catch (error) {
+      setMessage(`エラー: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
     try {
-      const response = await apiClient.post('/auth/login', formData);
-      
-      // トークンを保存
-      localStorage.setItem('access_token', response.access_token);
-      localStorage.setItem('refresh_token', response.refresh_token);
-      
+      await signInWithEmail(formData.email, formData.password);
       setMessage('ログイン成功！');
       
-      // ホームページにリダイレクト
       setTimeout(() => {
         navigate('/');
       }, 1000);
       
     } catch (error) {
-      setMessage(`エラー: ${error.response?.data?.detail || error.message}`);
+      setMessage(`エラー: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -49,6 +62,30 @@ const SignIn = () => {
       <h1>サインイン</h1>
       
       {message && <p>{message}</p>}
+      
+      {/* Googleログインボタン */}
+      <div style={{ marginBottom: '20px' }}>
+        <button 
+          onClick={handleGoogleSignIn} 
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: '#4285f4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '16px'
+          }}
+        >
+          {loading ? 'Googleでログイン中...' : 'Googleでログイン'}
+        </button>
+      </div>
+      
+      <div style={{ textAlign: 'center', margin: '20px 0' }}>
+        <span>または</span>
+      </div>
       
       <form onSubmit={handleSubmit}>
         <div>
@@ -74,17 +111,13 @@ const SignIn = () => {
         </div>
         
         <button type="submit" disabled={loading}>
-          {loading ? 'ログイン中...' : 'ログイン'}
+          {loading ? 'ログイン中...' : 'メールでログイン'}
         </button>
       </form>
       
       <p>
         アカウントをお持ちでないですか？{' '}
         <a href="/signup">サインアップ</a>
-      </p>
-      
-      <p>
-        <a href="/forgot-password">パスワードを忘れた方</a>
       </p>
     </div>
   );

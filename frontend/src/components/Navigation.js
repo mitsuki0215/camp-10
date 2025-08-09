@@ -1,21 +1,31 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { logout } from '../firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 const Navigation = () => {
-  const isLoggedIn = localStorage.getItem('access_token');
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    window.location.href = '/signin';
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/signin');
+    } catch (error) {
+      console.error('ログアウトエラー:', error);
+    }
   };
 
   return (
     <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc', marginBottom: '2rem' }}>
       <a href="/" style={{ marginRight: '1rem' }}>ホーム</a>
-      {isLoggedIn ? (
+      {user ? (
         <>
           <a href="/anq" style={{ marginRight: '1rem' }}>アンケート作成</a>
           <a href="/profile" style={{ marginRight: '1rem' }}>プロフィール</a>
+          <span style={{ marginRight: '1rem' }}>
+            こんにちは、{user.displayName || user.email}さん
+          </span>
           <button onClick={handleLogout}>ログアウト</button>
         </>
       ) : (
