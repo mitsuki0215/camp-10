@@ -216,6 +216,18 @@
   color: var(--text-gray);
 }
 
+.points {
+  display: flex;
+  align-items: center;
+  color: var(--accent-purple);
+  font-weight: 600;
+}
+
+.points::before {
+  content: "💰";
+  margin-right: 0.25rem;
+}
+
 .response-count {
   display: flex;
   align-items: center;
