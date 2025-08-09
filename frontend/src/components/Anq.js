@@ -18,22 +18,18 @@ const Anq = () => {
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // 質問を追加
   const addQuestion = () => {
     setQuestions([...questions, defaultQuestion()]);
   };
 
-  // 質問を削除
   const deleteQuestion = (id) => {
     setQuestions(questions.filter(q => q.id !== id));
   };
 
-  // 質問の内容を更新
   const updateQuestion = (id, newData) => {
     setQuestions(questions.map(q => (q.id === id ? { ...q, ...newData } : q)));
   };
 
-  // 選択肢の内容を更新
   const updateOption = (id, index, value) => {
     setQuestions(questions.map(q => {
       if (q.id === id) {
@@ -45,7 +41,6 @@ const Anq = () => {
     }));
   };
 
-  // 選択肢を追加
   const addOption = (id) => {
     setQuestions(questions.map(q => {
       if (q.id === id) {
@@ -55,7 +50,6 @@ const Anq = () => {
     }));
   };
 
-  // 選択肢を削除
   const deleteOption = (id, index) => {
     setQuestions(questions.map(q => {
       if (q.id === id) {
@@ -66,9 +60,6 @@ const Anq = () => {
     }));
   };
 
-
-
-  // アンケートを保存
   const saveSurvey = async () => {
     if (!title.trim()) {
       alert('アンケートのタイトルを入力してください');
@@ -91,7 +82,6 @@ const Anq = () => {
       await surveyService.createSurvey(surveyData);
       alert('アンケートが保存されました！');
 
-      // フォームをリセット
       setTitle('');
       setDescription('');
       setQuestions([defaultQuestion()]);
@@ -220,25 +210,8 @@ const Anq = () => {
           disabled={saving}
         >
           {saving ? '保存中...' : 'アンケート保存'}
-
-
-      {/* 元の保存ボタン（コメントアウト済み）
-      <div className="survey-actions">
-        <button
-          className="add-question-main-btn"
-          onClick={addQuestion}
-        >
-          ＋ 質問を追加
-        </button>
-        <button
-          className="save-survey-btn"
-          onClick={saveSurvey}
-          disabled={saving}
-        >
-          {saving ? '保存中...' : 'アンケートを保存'}
         </button>
       </div>
-      */}
     </div>
   );
 };
