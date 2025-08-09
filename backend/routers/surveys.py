@@ -34,7 +34,9 @@ async def get_surveys(
             "description": survey.description,
             "response_count": survey.response_count,
             "duration": duration,
-            "created_at": survey.created_at
+            "created_at": survey.created_at,
+            "reward_points": survey.reward_points,
+            "target_responses": survey.target_responses
         }
         survey_list.append(SurveyList(**survey_data))
     

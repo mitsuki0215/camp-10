@@ -99,6 +99,8 @@ class SurveyList(BaseSchema):
     response_count: int
     duration: Optional[str] = None
     created_at: datetime
+    reward_points: int
+    target_responses: int
 
 # アンケート回答関連スキーマ（シンプル版）
 class SurveyResponseCreate(BaseSchema):
