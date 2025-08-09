@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
 import './Anq.css';
 
@@ -59,6 +60,13 @@ const Anq = () => {
       }
       return q;
     }));
+  };
+
+  // アンケート投稿処理（仮実装）
+  const handleSubmit = () => {
+    alert('アンケートが投稿されました！');
+    // 実際の実装では、APIにデータを送信
+    console.log('投稿データ:', questions);
   };
 
   return (
@@ -137,6 +145,16 @@ const Anq = () => {
       >
         ＋ 質問を追加
       </button>
+      
+      {/* アクションボタン */}
+      <div className="action-buttons">
+        <Link to="/" className="cancel-btn">
+          キャンセル
+        </Link>
+        <button className="submit-btn" onClick={handleSubmit}>
+          アンケート投稿
+        </button>
+      </div>
     </div>
   );
 };
