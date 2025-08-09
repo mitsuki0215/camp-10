@@ -74,6 +74,10 @@ const Home = () => {
             <span className="plus-icon">+</span>
             アンケート作成
           </Link>
+          <Link to="/prizes" className="add-survey-btn">
+            <span className="plus-icon">🎁</span>
+            懸賞
+          </Link>
           <Link to="/profile" className="profile-icon">
             <div className="profile-avatar">
               <span>👤</span>
