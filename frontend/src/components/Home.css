@@ -231,6 +231,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+  text-decoration: none;
+  display: inline-block;
 }
 
 .answer-btn:hover {
