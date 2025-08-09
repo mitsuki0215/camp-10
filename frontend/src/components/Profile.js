@@ -276,15 +276,6 @@ const Profile = () => {
         <div className="my-surveys-list">
           {myPosts.map(post => (
             <div key={post.id} className="my-survey-card">
-              {/* 削除ボタンを右上に配置 */}
-              <button 
-                className="delete-btn-top"
-                onClick={() => handleDeleteSurvey(post.id, post.title)}
-                title="削除"
-              >
-                ×
-              </button>
-              
               <div className="survey-status">
                 <span className={`status-badge ${post.status === '公開中' ? 'active' : 'inactive'}`}>
                   {post.status}
@@ -303,19 +294,29 @@ const Profile = () => {
               </div>
               
               <div className="survey-actions">
-                <Link 
-                  to={`/survey-results/${post.id}`}
-                  className="action-btn view-results-btn"
-                >
-                  📊 結果を見る
-                </Link>
+                <div className="left-actions">
+                  <Link 
+                    to={`/survey-results/${post.id}`}
+                    className="action-btn view-results-btn"
+                  >
+                    📊 結果を見る
+                  </Link>
+                  
+                  {/* 公開/終了ボタンをステータスに応じて表示 */}
+                  <button 
+                    className={`action-btn toggle-btn ${post.status === '公開中' ? 'end-btn' : 'start-btn'}`}
+                    onClick={() => handleToggleStatus(post.id, post.isActive || (post.status === '公開中'))}
+                  >
+                    {post.status === '公開中' ? '🔒 公開終了' : '▶️ 公開開始'}
+                  </button>
+                </div>
                 
-                {/* 公開/終了ボタンをステータスに応じて表示 */}
+                {/* 削除ボタンを右下に配置 */}
                 <button 
-                  className={`action-btn toggle-btn ${post.status === '公開中' ? 'end-btn' : 'start-btn'}`}
-                  onClick={() => handleToggleStatus(post.id, post.isActive || (post.status === '公開中'))}
+                  className="action-btn delete-btn"
+                  onClick={() => handleDeleteSurvey(post.id, post.title)}
                 >
-                  {post.status === '公開中' ? '🔒 公開終了' : '▶️ 公開開始'}
+                  削除
                 </button>
               </div>
             </div>
