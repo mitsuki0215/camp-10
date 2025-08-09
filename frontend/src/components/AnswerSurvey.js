@@ -6,7 +6,7 @@ import './AnswerSurvey.css';
 
 const AnswerSurvey = () => {
   const { id } = useParams();
-  const { user: firebaseUser, supabaseUser } = useAuth();
+  const { supabaseUser } = useAuth();
   const [survey, setSurvey] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
