@@ -66,6 +66,13 @@ async def create_survey(
     db: Session = Depends(get_db)
 ):
     """Create a new survey"""
+    # Check if user has enough points
+    if current_user.points < survey.required_points:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Insufficient points. Required: {survey.required_points}, Available: {current_user.points}"
+        )
+    
     # Convert questions to dict format for JSON storage
     questions_dict = [q.dict() for q in survey.questions]
     
@@ -74,17 +81,20 @@ async def create_survey(
         description=survey.description,
         questions=questions_dict,
         creator_id=current_user.id,
-        required_points=getattr(survey, 'required_points', 1000),
-        reward_points=getattr(survey, 'reward_points', 50),
-        target_responses=getattr(survey, 'target_responses', 50),
-        estimated_time=getattr(survey, 'estimated_time', 5)
+        required_points=survey.required_points,
+        reward_points=survey.reward_points,
+        target_responses=survey.target_responses,
+        estimated_time=survey.estimated_time
     )
     
     db.add(db_survey)
     db.commit()
     db.refresh(db_survey)
     
-    # Award points to user for creating survey
+    # Deduct required points from user
+    current_user.points -= survey.required_points
+    
+    # Award bonus points and experience for creating survey
     current_user.points += 10
     current_user.experience += 50
     
