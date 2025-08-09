@@ -16,6 +16,8 @@ class Settings:
     # データベース設定
     DATABASE_URL_LOCAL: Optional[str] = os.getenv("DATABASE_URL_LOCAL")
     DATABASE_URL_SUPABASE: Optional[str] = os.getenv("DATABASE_URL_SUPABASE")
+    SUPABASE_URL: Optional[str] = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY: Optional[str] = os.getenv("SUPABASE_KEY")
     DEVELOPMENT: bool = os.getenv("DEVELOPMENT", "False").lower() == "true"
     
     @property
@@ -24,7 +26,15 @@ class Settings:
         if self.DEVELOPMENT:
             url = self.DATABASE_URL_LOCAL
         else:
-            url = self.DATABASE_URL_SUPABASE
+            # Render本番環境用：Supabaseの環境変数から直接構築
+            if self.SUPABASE_URL and not self.DATABASE_URL_SUPABASE:
+                # SUPABASEのURLからPostgreSQLの接続URLを構築
+                supabase_host = self.SUPABASE_URL.replace('https://', '').replace('http://', '')
+                project_id = supabase_host.split('.')[0]
+                # Supabase Postgresの標準接続URL形式
+                url = f"postgresql://postgres:[YOUR_PASSWORD]@db.{project_id}.supabase.co:5432/postgres"
+            else:
+                url = self.DATABASE_URL_SUPABASE
             
         if not url:
             # 開発用のデフォルトSQLiteデータベース

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: questly-backend
+    env: python
+    region: oregon
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && ./start.sh
+    plan: free
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY  
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: DEBUG
+        value: "False"
+      - key: DEVELOPMENT
+        value: "False"
