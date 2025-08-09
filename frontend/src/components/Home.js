@@ -59,7 +59,7 @@ const Home = () => {
             </div>
           </Link>
           {user && (
-            <button onClick={handleLogout} style={{ marginLeft: '1rem' }}>
+            <button onClick={handleLogout} className="logout-btn">
               ログアウト
             </button>
           )}
