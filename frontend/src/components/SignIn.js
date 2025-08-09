@@ -7,22 +7,43 @@ import './SignIn.css';
 export default function SignIn() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
+      setError('');
       const provider = new GoogleAuthProvider();
+      
+      // Optional: Add additional scopes if needed
+      // provider.addScope('email');
+      // provider.addScope('profile');
+      
       await signInWithPopup(auth, provider);
       // ログイン完了後すぐにホームへ
       navigate('/');
     } catch (error) {
       console.error('Google login error:', error);
+      
+      // エラーメッセージを日本語で表示
+      if (error.code === 'auth/unauthorized-domain') {
+        setError('このドメインからのログインは許可されていません。管理者にお問い合わせください。');
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        setError('ログインがキャンセルされました。');
+      } else if (error.code === 'auth/popup-blocked') {
+        setError('ポップアップがブロックされました。ブラウザの設定を確認してください。');
+      } else {
+        setError('ログインに失敗しました。しばらく後でお試しください。');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    // デバッグ用：現在のオリジンを確認
+    console.log('Current origin:', window.location.origin);
+    
     // すでにログイン済みならホームへ
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -47,6 +68,13 @@ export default function SignIn() {
           Googleアカウントでログインして、<br />
           アンケートの作成・回答を始めましょう
         </p>
+
+        {/* エラーメッセージ */}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
 
         {/* Googleログインボタン */}
         <button 
