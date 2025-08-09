@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
+import { apiClient } from '../utils/api';
 import './Anq.css';
 
 const defaultQuestion = () => ({
@@ -13,6 +14,9 @@ const defaultQuestion = () => ({
 
 const Anq = () => {
   const [questions, setQuestions] = useState([defaultQuestion()]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [saving, setSaving] = useState(false);
 
   // 質問を追加
   const addQuestion = () => {
@@ -62,16 +66,78 @@ const Anq = () => {
     }));
   };
 
+
   // アンケート投稿処理（仮実装）
   const handleSubmit = () => {
     alert('アンケートが投稿されました！');
     // 実際の実装では、APIにデータを送信
     console.log('投稿データ:', questions);
+
+  // アンケートを保存
+  const saveSurvey = async () => {
+    if (!title.trim()) {
+      alert('アンケートのタイトルを入力してください');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const surveyData = {
+        title: title.trim(),
+        description: description.trim(),
+        questions: questions.map(q => ({
+          text: q.text,
+          type: q.type,
+          options: q.options,
+          required: q.required
+        }))
+      };
+
+      await apiClient.post('/api/surveys', surveyData);
+      alert('アンケートが保存されました！');
+      
+      // フォームをリセット
+      setTitle('');
+      setDescription('');
+      setQuestions([defaultQuestion()]);
+    } catch (error) {
+      console.error('Failed to save survey:', error);
+      alert('アンケートの保存に失敗しました');
+    } finally {
+      setSaving(false);
+    }
+
   };
 
   return (
     <div className="anq-container">
       <h1 className="anq-title">アンケート作成</h1>
+      
+      {/* アンケート基本情報 */}
+      <div className="survey-info-section">
+        <div className="input-group">
+          <label htmlFor="survey-title">アンケートタイトル *</label>
+          <input
+            id="survey-title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="アンケートのタイトルを入力してください"
+            className="survey-title-input"
+          />
+        </div>
+        <div className="input-group">
+          <label htmlFor="survey-description">説明</label>
+          <textarea
+            id="survey-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="アンケートの説明を入力してください（任意）"
+            className="survey-description-input"
+            rows="3"
+          />
+        </div>
+      </div>
       {questions.map(q => (
         <div key={q.id} className="question-card">
           <div className="question-header">
@@ -139,6 +205,7 @@ const Anq = () => {
           )}
         </div>
       ))}
+
       <button
         className="add-question-main-btn"
         onClick={addQuestion}
@@ -153,7 +220,25 @@ const Anq = () => {
         </Link>
         <button className="submit-btn" onClick={handleSubmit}>
           アンケート投稿
+
+      /* コンフリクトを起こしたのでコメントアウト措置
+      <div className="survey-actions">
+        <button
+          className="add-question-main-btn"
+          onClick={addQuestion}
+        >
+          ＋ 質問を追加
         </button>
+        <button
+          className="save-survey-btn"
+          onClick={saveSurvey}
+          disabled={saving}
+        >
+          {saving ? '保存中...' : 'アンケートを保存'}
+
+        </button>
+        */
+
       </div>
     </div>
   );
