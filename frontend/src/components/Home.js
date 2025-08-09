@@ -110,7 +110,9 @@ const Home = () => {
                 </div>
               </div>
               <div className="survey-actions">
-                <button className="answer-btn">回答する</button>
+                <Link to={`/survey/${survey.id}`} className="answer-btn">
+                  回答する
+                </Link>
               </div>
             </div>
           ))}

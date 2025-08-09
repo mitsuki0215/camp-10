@@ -5,6 +5,7 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import ProfileEdit from './components/ProfileEdit';
 import Anq from './components/Anq';
+import AnswerSurvey from './components/AnswerSurvey';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import Navigation from './components/Navigation';
@@ -15,36 +16,18 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <AuthProvider>
-        <Router>
-          <Navigation />
-          <Routes>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/email-verified" element={<EmailVerificationSuccess />} />
-            <Route path="/" element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            } />
-            <Route path="/profile" element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            } />
-            <Route path="/profile/edit" element={
-              <PrivateRoute>
-                <ProfileEdit />
-              </PrivateRoute>
-            } />
-            <Route path="/anq" element={
-              <PrivateRoute>
-                <Anq />
-              </PrivateRoute>
-            } />
-          </Routes>
-        </Router>
-      </AuthProvider>
+
+      <Router>
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/edit" element={<ProfileEdit />} />
+          <Route path="/anq" element={<Anq />} />
+          <Route path="/survey/:id" element={<AnswerSurvey />} />
+        </Routes>
+      </Router>
+
     </div>
   );
 }

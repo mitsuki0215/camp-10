@@ -67,6 +67,7 @@ const Anq = () => {
   };
 
 
+
   // アンケートを保存
   const saveSurvey = async () => {
     if (!title.trim()) {
@@ -89,7 +90,7 @@ const Anq = () => {
 
       await surveyService.createSurvey(surveyData);
       alert('アンケートが保存されました！');
-      
+
       // フォームをリセット
       setTitle('');
       setDescription('');
@@ -105,7 +106,7 @@ const Anq = () => {
   return (
     <div className="anq-container">
       <h1 className="anq-title">アンケート作成</h1>
-      
+
       {/* アンケート基本情報 */}
       <div className="survey-info-section">
         <div className="input-group">
@@ -131,6 +132,7 @@ const Anq = () => {
           />
         </div>
       </div>
+
       {questions.map(q => (
         <div key={q.id} className="question-card">
           <div className="question-header">
@@ -205,20 +207,38 @@ const Anq = () => {
       >
         ＋ 質問を追加
       </button>
-      
+
       {/* アクションボタン */}
       <div className="action-buttons">
         <Link to="/" className="cancel-btn">
           キャンセル
         </Link>
+
         <button 
           className="submit-btn" 
           onClick={saveSurvey}
           disabled={saving}
         >
           {saving ? '保存中...' : 'アンケート保存'}
+
+
+      {/* 元の保存ボタン（コメントアウト済み）
+      <div className="survey-actions">
+        <button
+          className="add-question-main-btn"
+          onClick={addQuestion}
+        >
+          ＋ 質問を追加
+        </button>
+        <button
+          className="save-survey-btn"
+          onClick={saveSurvey}
+          disabled={saving}
+        >
+          {saving ? '保存中...' : 'アンケートを保存'}
         </button>
       </div>
+      */}
     </div>
   );
 };

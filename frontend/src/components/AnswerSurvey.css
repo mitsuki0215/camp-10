@@ -1,0 +1,417 @@
+/* AnswerSurvey.css */
+
+/* カラーパレット */
+:root {
+  --primary-purple: #6b46c1;
+  --light-purple: #e0e7ff;
+  --accent-purple: #a855f7;
+  --white: #ffffff;
+  --light-gray: #f8fafc;
+  --text-dark: #1e293b;
+  --text-gray: #64748b;
+  --border-light: #e2e8f0;
+  --success-green: #10b981;
+  --danger-red: #ef4444;
+  --warning-yellow: #f59e0b;
+}
+
+.answer-survey-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--light-purple) 0%, var(--white) 50%, var(--light-purple) 100%);
+  padding: 2rem;
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+}
+
+/* ヘッダー部分 */
+.answer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding: 0 1rem;
+}
+
+.back-button {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  background: var(--white);
+  border: 2px solid var(--border-light);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.back-button:hover {
+  background: var(--light-purple);
+  border-color: var(--primary-purple);
+  transform: translateY(-1px);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+/* アンケート情報 */
+.survey-info {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+  text-align: center;
+}
+
+.survey-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 1rem 0;
+}
+
+.survey-description {
+  color: var(--text-gray);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 質問コンテナ */
+.questions-container {
+  max-width: 800px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 質問カード */
+.question-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.question-card:hover {
+  box-shadow: 0 6px 20px rgba(107, 70, 193, 0.1);
+  border-color: var(--light-purple);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.question-number {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-purple);
+  margin: 0;
+}
+
+.required-mark {
+  background: var(--danger-red);
+  color: var(--white);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* 回答セクション */
+.answer-section {
+  margin-top: 1.5rem;
+}
+
+/* テキスト入力 */
+.text-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-family: inherit;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  box-shadow: 0 4px 16px rgba(107, 70, 193, 0.2);
+}
+
+/* テキストエリア入力 */
+.textarea-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.textarea-input:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  box-shadow: 0 4px 16px rgba(107, 70, 193, 0.2);
+}
+
+/* ラジオボタンオプション */
+.radio-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--white);
+}
+
+.radio-option:hover {
+  background: var(--light-purple);
+  border-color: var(--primary-purple);
+}
+
+.radio-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 1rem;
+  accent-color: var(--primary-purple);
+  cursor: pointer;
+}
+
+.radio-text {
+  font-size: 1rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* チェックボックスオプション */
+.checkbox-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--white);
+}
+
+.checkbox-option:hover {
+  background: var(--light-purple);
+  border-color: var(--primary-purple);
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 1rem;
+  accent-color: var(--primary-purple);
+  cursor: pointer;
+}
+
+.checkbox-text {
+  font-size: 1rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* アクションボタン */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cancel-btn {
+  color: var(--text-gray);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  background: var(--white);
+  border: 2px solid var(--border-light);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancel-btn:hover {
+  background: var(--light-gray);
+  border-color: var(--text-gray);
+  transform: translateY(-1px);
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, var(--primary-purple), var(--accent-purple));
+  color: var(--white);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 70, 193, 0.4);
+}
+
+.submit-btn:disabled {
+  background: var(--text-gray);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ローディング・エラーメッセージ */
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: var(--text-gray);
+}
+
+.back-home-btn {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  background: var(--white);
+  border: 2px solid var(--primary-purple);
+  transition: all 0.3s ease;
+}
+
+.back-home-btn:hover {
+  background: var(--primary-purple);
+  color: var(--white);
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .answer-survey-container {
+    padding: 1rem;
+  }
+
+  .answer-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .question-card {
+    padding: 1.5rem;
+  }
+
+  .survey-info {
+    padding: 1.5rem;
+  }
+
+  .survey-title {
+    font-size: 1.5rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .radio-options,
+  .checkbox-options {
+    gap: 0.75rem;
+  }
+
+  .radio-option,
+  .checkbox-option {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .question-card {
+    padding: 1rem;
+  }
+
+  .survey-info {
+    padding: 1rem;
+  }
+
+  .question-text {
+    font-size: 1rem;
+  }
+
+  .text-input,
+  .textarea-input {
+    padding: 0.75rem;
+  }
+
+  .radio-option,
+  .checkbox-option {
+    padding: 0.75rem;
+  }
+}
