@@ -142,13 +142,7 @@ const ProfileEdit = () => {
           ← プロフィールに戻る
         </Link>
         <h1 className="page-title">プロフィール編集</h1>
-        <button 
-          className="save-btn" 
-          onClick={handleSave}
-          disabled={loading}
-        >
-          {loading ? '保存中...' : '💾 保存'}
-        </button>
+        
       </div>
 
       {/* 編集フォーム */}

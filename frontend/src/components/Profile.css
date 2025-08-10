@@ -47,6 +47,7 @@
 .page-title {
   font-size: 2rem;
   font-weight: 700;
+  padding-top: 50px;
   color: var(--primary-purple);
   margin: 0;
   flex: 1;
@@ -455,70 +456,154 @@
   }
 
   .profile-header {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    text-align: center;
+    position: relative;
+    margin-bottom: 2rem;
+    min-height: 80px;
+    display: block;
+  }
+
+  .back-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   }
 
   .page-title {
+    font-size: 1.5rem;
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
     text-align: center;
+    margin: 0;
+  }
+
+  .profile-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .edit-profile-btn {
     width: 100%;
     max-width: 200px;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
   }
 
   .user-info-card {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .user-name {
+    font-size: 1.4rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rank-section {
+    padding: 1.5rem;
   }
 
   .rank-info {
     align-items: center;
+    text-align: center;
+  }
+
+  .rank-badge {
+    align-self: center;
   }
 
   .points-card {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .stat-card {
     padding: 1.5rem;
   }
 
-  .survey-actions {
-    flex-direction: column;
-  }
-
-  .view-results-btn,
-  .publish-toggle-btn,
-  .delete-survey-btn {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .user-name {
-    font-size: 1.5rem;
+  .points-value {
+    font-size: 2rem;
   }
 
   .my-survey-card {
     padding: 1.5rem;
   }
 
+  .survey-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .left-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .delete-btn {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 0.75rem;
+  }
+
+  .user-avatar-large {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .user-name {
+    font-size: 1.2rem;
+  }
+
+  .grade-value {
+    font-size: 1rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .points-icon {
+    font-size: 2.5rem;
+  }
+
+  .points-value {
+    font-size: 1.8rem;
+  }
+
+  .my-survey-card {
+    padding: 1rem;
+  }
+
   .survey-status {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  .survey-title {
+    font-size: 1.1rem;
+  }
+
+  .action-btn {
+    padding: 0.6rem;
+    min-width: unset;
   }
 }
 

@@ -507,13 +507,165 @@
     padding: 1rem;
   }
 
+  .prizes-header {
+    position: relative;
+    margin-bottom: 2rem;
+    min-height: 80px;
+    display: block;
+    padding: 0 0.5rem;
+  }
+
+  .back-button {
+    position: absolute;
+    top: 0;
+    left: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
   .page-title {
+    font-size: 1.8rem;
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 1rem);
+    text-align: center;
+    margin: 0;
+  }
+
+  .points-card {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .points-icon {
     font-size: 2rem;
   }
 
+  .points-value {
+    font-size: 1.8rem;
+  }
+
+  .gacha-info h2 {
+    font-size: 1.5rem;
+  }
+
+  .prize-list {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .prize-item {
+    padding: 0.75rem;
+  }
+
+  .prize-name {
+    font-size: 0.875rem;
+  }
+
+  .gacha-machine {
+    max-width: 100%;
+    margin: 1.5rem auto;
+  }
+
   .machine-screen {
-    width: 280px;
+    width: 250px;
     height: 200px;
+  }
+
+  .screen-icon {
+    font-size: 3rem;
+  }
+
+  .spinning-wheel {
+    width: 150px;
+    height: 150px;
+  }
+
+  .wheel-segment {
+    font-size: 1.5rem;
+  }
+
+  .gacha-button {
+    width: 200px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .reset-button {
+    width: 180px;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .gacha-stats {
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .gacha-stats h3 {
+    font-size: 1.2rem;
+  }
+
+  .back-to-surveys {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .prizes-container {
+    padding: 0.75rem;
+  }
+
+  .prizes-header {
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .points-card {
+    padding: 1rem;
+  }
+
+  .points-value {
+    font-size: 1.5rem;
+  }
+
+  .gacha-info h2 {
+    font-size: 1.3rem;
+  }
+
+  .prize-item {
+    padding: 0.6rem;
+    text-align: center;
+  }
+
+  .prize-icon {
+    font-size: 1.2rem;
+  }
+
+  .prize-name {
+    font-size: 0.8rem;
+  }
+
+  .prize-rate {
+    font-size: 0.75rem;
+  }
+
+  .machine-screen {
+    width: 200px;
+    height: 160px;
+  }
+
+  .screen-icon {
+    font-size: 2.5rem;
   }
 
   .spinning-wheel {
@@ -521,45 +673,44 @@
     height: 120px;
   }
 
-  .prize-list {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  .gacha-rules {
-    padding: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .prizes-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-  }
-
-  .back-button {
-    order: 2;
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-    position: static;
-    transform: none;
-    order: 1;
-  }
-
-  .machine-body {
-    padding: 1.5rem;
-  }
-
-  .machine-screen {
-    width: 240px;
-    height: 180px;
+  .wheel-segment {
+    font-size: 1.2rem;
   }
 
   .gacha-button {
-    padding: 0.75rem 1.5rem;
+    width: 160px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .reset-button {
+    width: 140px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .result-icon {
+    font-size: 3rem;
+  }
+
+  .result-name {
     font-size: 1rem;
+  }
+
+  .gacha-stats {
+    padding: 1rem;
+  }
+
+  .gacha-stats h3 {
+    font-size: 1.1rem;
+  }
+
+  .gacha-stats p {
+    font-size: 0.875rem;
+  }
+
+  .back-to-surveys {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
   }
 }

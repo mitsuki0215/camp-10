@@ -420,11 +420,12 @@ input[type="number"] {
 
   .anq-title {
     font-size: 2rem;
+    margin-bottom: 1.5rem;
   }
 
-  .survey-info-section,
-  .question-card {
+  .survey-info-section, .questions-section {
     padding: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .input-row {
@@ -432,44 +433,130 @@ input[type="number"] {
     gap: 1rem;
   }
 
+  .input-group {
+    width: 100%;
+  }
+
+  .survey-title-input, .survey-input, .survey-description-input {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .question-card {
+    padding: 1.5rem;
+  }
+
   .question-header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 1rem;
   }
 
   .question-controls {
-    justify-content: space-between;
+    width: 100%;
+    justify-content: flex-start;
   }
 
-  .option-item {
+  .question-input {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .question-type-select {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .options-list {
+    gap: 0.75rem;
+  }
+
+  .option-input-group {
     flex-direction: column;
     gap: 0.5rem;
-    align-items: stretch;
   }
 
-  .delete-option-btn {
-    align-self: flex-end;
+  .option-input {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.6rem;
+  }
+
+  .remove-option-btn {
+    align-self: flex-start;
+    width: auto;
+  }
+
+  .add-option-btn, .add-question-btn, .add-question-main-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
   }
 
   .action-buttons {
     flex-direction: column;
+    gap: 1rem;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1rem;
+    margin: 0 -1rem -1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .cancel-btn, .submit-btn {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .error-message, .general-error {
+    font-size: 0.875rem;
+    padding: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .survey-info-section,
-  .question-card {
-    padding: 1rem;
+  .anq-container {
+    padding: 0.75rem;
   }
 
   .anq-title {
     font-size: 1.75rem;
   }
 
-  .question-controls {
+  .survey-info-section, .questions-section {
+    padding: 1rem;
+  }
+
+  .question-card {
+    padding: 1rem;
+  }
+
+  .question-number {
+    font-size: 1rem;
+  }
+
+  .question-input {
+    padding: 0.6rem;
+  }
+
+  .option-input {
+    padding: 0.5rem;
+  }
+
+  .checkbox-group, .required-group {
     flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .action-buttons {
+    padding: 0.75rem;
+    margin: 0 -0.75rem -0.75rem;
+  }
+
+  .cancel-btn, .submit-btn {
+    padding: 0.7rem;
   }
 }
