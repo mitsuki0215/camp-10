@@ -1,5 +1,22 @@
 /* AnswerSurvey.css */
 
+/* AnswerSurvey専用スタイル */
+.answer-back-button {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 2px solid var(--primary-purple);
+}
+
+.answer-back-button:hover {
+  background: var(--primary-purple);
+  color: var(--white);
+  transform: translateX(-2px);
+}
+
 /* カラーパレット */
 :root {
   --primary-purple: #6b46c1;
@@ -139,6 +156,18 @@
   align-items: center;
   margin-bottom: 3rem;
   padding: 0 1rem;
+  position: relative;
+}
+
+.answer-page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-purple);
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .back-button {
