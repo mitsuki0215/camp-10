@@ -48,10 +48,37 @@
   transform: translateY(-1px);
 }
 
+/* プロフィール編集ページ専用スタイル */
+.profile-edit-back-button {
+  color: #5a4fcf;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  background: var(--white);
+  border: 2px solid #5a4fcf;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.profile-edit-back-button:hover {
+  background: #5a4fcf;
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
 .page-title {
   font-size: 2rem;
   font-weight: 700;
   color: var(--text-dark);
+  margin: 0;
+}
+
+/* プロフィール編集ページ専用タイトル */
+.profile-edit-page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #5a4fcf;
   margin: 0;
 }
 
