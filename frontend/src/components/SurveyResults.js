@@ -149,7 +149,7 @@ const SurveyResults = () => {
     return (
       <div className="results-container">
         <div className="error">{error}</div>
-        <Link to="/profile" className="back-button">
+        <Link to="/profile" className="back-button survey-back-button">
           ← プロフィールに戻る
         </Link>
       </div>
@@ -160,7 +160,7 @@ const SurveyResults = () => {
     return (
       <div className="results-container">
         <div className="error">アンケートが見つかりません</div>
-        <Link to="/profile" className="back-button">
+        <Link to="/profile" className="back-button survey-back-button">
           ← プロフィールに戻る
         </Link>
       </div>
@@ -173,10 +173,10 @@ const SurveyResults = () => {
     <div className="results-container">
       {/* ヘッダー */}
       <div className="results-header">
-        <Link to="/profile" className="back-button">
+        <Link to="/profile" className="back-button survey-back-button">
           ← プロフィールに戻る
         </Link>
-        <h1 className="page-title">アンケート結果</h1>
+        <h1 className="page-title survey-page-title">アンケート結果</h1>
         <button 
           onClick={handleExportCSV}
           className="export-csv-btn"
