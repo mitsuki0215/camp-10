@@ -18,7 +18,7 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     rank = Column(String, default="Bronze")
     experience = Column(Integer, default=0)
-    experience_to_next = Column(Integer, default=100)
+    experience_to_next = Column(Integer, default=2000)  # Increased from 100 to 1000
     points = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

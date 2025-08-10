@@ -160,18 +160,47 @@ const Profile = () => {
     email: supabaseUser?.email || firebaseUser?.email || '',
     rank: userStats?.rank || supabaseUser?.rank || 'Bronze',
     experience: userStats?.experience || supabaseUser?.experience || 0,
-    experience_to_next: userStats?.experience_to_next || supabaseUser?.experience_to_next || 100,
     points: userStats?.points || supabaseUser?.points || 0,
     grade: supabaseUser?.grade || '',
     avatar: getDisplayAvatar(),
     created_at: supabaseUser?.created_at || new Date().toISOString(),
-    created_surveys: userStats?.created_surveys || 0,
-    active_surveys: userStats?.active_surveys || 0,
-    responses_given: userStats?.responses_given || 0
   };
 
-  // 経験値の進捗率を計算
-  const experienceProgress = (displayUser.experience / displayUser.experience_to_next) * 100;
+  // ランクシステムの閾値を定義
+  const getRankThresholds = (rank) => {
+    switch (rank) {
+      case 'Bronze':
+        return { current: 0, next: 2000, nextRank: 'Silver' };
+      case 'Silver':
+        return { current: 2000, next: 5000, nextRank: 'Gold' };
+      case 'Gold':
+        return { current: 5000, next: 10000, nextRank: 'Platinum' };
+      case 'Platinum':
+        return { current: 10000, next: 10000, nextRank: 'Max' };
+      default:
+        return { current: 0, next: 2000, nextRank: 'Silver' };
+    }
+  };
+  
+  // 経験値関連の計算をここでまとめて行う
+  const thresholds = getRankThresholds(displayUser.rank);
+  const isMaxRank = displayUser.rank === 'Platinum';
+
+  let experienceProgress = 0;
+  let xpForNextRank = 0;
+
+  if (isMaxRank) {
+    experienceProgress = 100;
+  } else {
+    const xpNeededForRank = thresholds.next - thresholds.current;
+    const xpInCurrentRank = displayUser.experience - thresholds.current;
+    xpForNextRank = thresholds.next - displayUser.experience;
+    
+    // 経験値が閾値を超えてもゲージが100%を超えないようにし、0未満にもならないようにする
+    experienceProgress = xpNeededForRank > 0 
+      ? Math.max(0, Math.min((xpInCurrentRank / xpNeededForRank) * 100, 100))
+      : 0;
+  }
 
   // アンケート管理機能
   const handleToggleStatus = async (surveyId, currentStatus) => {
@@ -301,7 +330,14 @@ const Profile = () => {
           </div>
           <div className="experience-info">
             <div className="experience-text">
-              <span>経験値: {displayUser.experience} / {displayUser.experience_to_next} XP</span>
+              <span className="xp-label">経験値</span>
+              {isMaxRank ? (
+                <span className="xp-value">{displayUser.experience.toLocaleString()} XP (最高ランク)</span>
+              ) : (
+                <span className="xp-value">
+                  {displayUser.experience.toLocaleString()} / {thresholds.next.toLocaleString()} XP
+                </span>
+              )}
             </div>
             <div className="experience-bar">
               <div 
@@ -309,6 +345,11 @@ const Profile = () => {
                 style={{ width: `${experienceProgress}%` }}
               ></div>
             </div>
+            {!isMaxRank && (
+              <div className="next-rank-info">
+                次のランク ({thresholds.nextRank}) まで残り {Math.max(0, xpForNextRank).toLocaleString()} XP
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -319,7 +360,7 @@ const Profile = () => {
           <div className="points-icon">💰</div>
           <div className="points-info">
             <h3>保有ポイント</h3>
-            <p className="points-value">{displayUser.points} P</p>
+            <p className="points-value">{displayUser.points.toLocaleString()} P</p>
             <p className="points-description">アンケート作成に使用できます</p>
           </div>
         </div>
@@ -336,7 +377,7 @@ const Profile = () => {
                 <span className={`status-badge ${post.status === '公開中' ? 'active' : 'inactive'}`}>
                   {post.status}
                 </span>
-                <span className="created-date">{post.createdAt}</span>
+                <span className="created-date">{new Date(post.createdAt).toLocaleDateString('ja-JP')}</span>
               </div>
               
               <div className="survey-content">
@@ -358,16 +399,14 @@ const Profile = () => {
                     📊 結果を見る
                   </Link>
                   
-                  {/* 公開/終了ボタンをステータスに応じて表示 */}
                   <button 
-                    className={`action-btn toggle-btn ${post.status === '公開中' ? 'end-btn' : 'start-btn'}`}
+                    className={`action-btn toggle-btn ${post.isActive || (post.status === '公開中') ? 'end-btn' : 'start-btn'}`}
                     onClick={() => handleToggleStatus(post.id, post.isActive || (post.status === '公開中'))}
                   >
-                    {post.status === '公開中' ? '🔒 公開終了' : '▶️ 公開開始'}
+                    {post.isActive || (post.status === '公開中') ? '🔒 公開終了' : '▶️ 公開再開'}
                   </button>
                 </div>
                 
-                {/* 削除ボタンを右下に配置 */}
                 <button 
                   className="action-btn delete-btn"
                   onClick={() => handleDeleteSurvey(post.id, post.title)}
