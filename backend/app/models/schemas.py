@@ -84,6 +84,7 @@ class SurveyCreate(SurveyBase):
     # reward_points should not be set from frontend - will be calculated as 10% of required_points
     target_responses: Optional[int] = Field(default=50, alias='targetResponses')
     estimated_time: Optional[int] = Field(default=5, alias='estimatedTime')
+    deadline: Optional[datetime] = None
     
     class Config:
         populate_by_name = True  # Allow both field name and alias

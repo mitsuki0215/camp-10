@@ -17,12 +17,47 @@ router = APIRouter(prefix="/api/surveys", tags=["surveys"])
 async def get_surveys(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
+    sort_by: str = Query("default", regex="^(default|latest|deadline)$"),
     db: Session = Depends(get_db)
 ):
-    """Get list of active surveys"""
-    surveys = db.query(Survey).filter(
+    """Get list of active surveys with sorting options"""
+    # Base query with joins to get creator rank
+    query = db.query(Survey).join(User, Survey.creator_id == User.id).filter(
         Survey.is_active == True
-    ).offset(skip).limit(limit).all()
+    )
+    
+    # Apply sorting based on sort_by parameter
+    if sort_by == "default":
+        # Default: Sort by points (desc) and creator rank priority
+        # Rank priority: Platinum=4, Gold=3, Silver=2, Bronze=1
+        rank_priority = {
+            'Platinum': 4,
+            'Gold': 3, 
+            'Silver': 2,
+            'Bronze': 1
+        }
+        surveys = query.all()
+        
+        # Sort by required_points (primary) and rank priority (secondary)
+        surveys.sort(key=lambda s: (
+            s.required_points * 1000 +  # Primary: points (multiplied for priority)
+            rank_priority.get(s.creator.rank, 1) * 100  # Secondary: rank
+        ), reverse=True)
+        
+        # Apply pagination manually after sorting
+        surveys = surveys[skip:skip + limit]
+        
+    elif sort_by == "latest":
+        # Sort by creation date (newest first)
+        surveys = query.order_by(Survey.created_at.desc()).offset(skip).limit(limit).all()
+        
+    elif sort_by == "deadline":
+        # Sort by deadline (earliest first, null deadlines at end)
+        surveys = query.order_by(Survey.deadline.asc().nullslast()).offset(skip).limit(limit).all()
+    
+    else:
+        # Fallback to default
+        surveys = query.order_by(Survey.created_at.desc()).offset(skip).limit(limit).all()
     
     # Convert to SurveyList format
     survey_list = []
@@ -96,7 +131,8 @@ async def create_survey(
         required_points=survey.required_points,
         reward_points=calculated_reward_points,
         target_responses=survey.target_responses,
-        estimated_time=survey.estimated_time
+        estimated_time=survey.estimated_time,
+        deadline=survey.deadline
     )
     
     db.add(db_survey)

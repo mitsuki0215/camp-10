@@ -10,6 +10,7 @@ const Home = () => {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortBy, setSortBy] = useState('default');
   const { user, supabaseUser } = useAuth();
 
   const handleLogout = async () => {
@@ -44,11 +45,10 @@ const Home = () => {
   return '👤';
 };
 
-  useEffect(() => {
-    const fetchSurveys = async () => {
-      try {
-        setLoading(true);
-        const data = await apiClient.get('/api/surveys');
+  const fetchSurveys = async (sortOption = 'default') => {
+    try {
+      setLoading(true);
+      const data = await apiClient.get(`/api/surveys?sort_by=${sortOption}`);
         
         // ログインユーザーの場合、回答済みアンケートをフィルタリング
         if (supabaseUser) {
@@ -68,12 +68,12 @@ const Home = () => {
           setSurveys(data);
         }
         
-        setError(null); // 成功時はエラーをクリア
-      } catch (err) {
-        console.error('Failed to fetch surveys:', err);
-        // APIが利用できない場合はダミーデータを表示し、エラーメッセージは非表示
-        setSurveys([
-          { id: 1, title: "大学生活に関するアンケート", description: "大学生活の満足度や改善点について教えてください", points: 1300, responseCount: 24, targetResponses: 50, duration: "約3分" },
+      setError(null); // 成功時はエラーをクリア
+    } catch (err) {
+      console.error('Failed to fetch surveys:', err);
+      // APIが利用できない場合はダミーデータを表示し、エラーメッセージは非表示
+      setSurveys([
+        { id: 1, title: "大学生活に関するアンケート", description: "大学生活の満足度や改善点について教えてください", points: 1300, responseCount: 24, targetResponses: 50, duration: "約3分" },
           { id: 2, title: "オンライン授業の評価調査", description: "オンライン授業の効果性や課題について", points: 500, responseCount: 18, targetResponses: 30, duration: "約5分" },
           { id: 3, title: "キャンパス施設利用に関するアンケート", description: "図書館や食堂、体育館などの施設利用について", points: 400, responseCount: 42, targetResponses: 40, duration: "約4分" },
           { id: 4, title: "就職活動支援サービスについて", description: "キャリア支援センターやインターンシップについて", points: 600, responseCount: 31, targetResponses: 60, duration: "約6分" },
@@ -85,8 +85,13 @@ const Home = () => {
       }
     };
 
-    fetchSurveys();
-  }, [supabaseUser]);
+  useEffect(() => {
+    fetchSurveys(sortBy);
+  }, [supabaseUser, sortBy]);
+
+  const handleSortChange = (newSortBy) => {
+    setSortBy(newSortBy);
+  };
 
   return (
     <div className="home-container">
@@ -124,6 +129,30 @@ const Home = () => {
             placeholder="アンケートを検索..." 
             className="search-input"
           />
+        </div>
+      </div>
+
+      {/* 並び替えセクション */}
+      <div className="sort-section">
+        <div className="sort-options">
+          <button 
+            className={`sort-btn ${sortBy === 'default' ? 'active' : ''}`}
+            onClick={() => handleSortChange('default')}
+          >
+            デフォルト
+          </button>
+          <button 
+            className={`sort-btn ${sortBy === 'latest' ? 'active' : ''}`}
+            onClick={() => handleSortChange('latest')}
+          >
+            最新順
+          </button>
+          <button 
+            className={`sort-btn ${sortBy === 'deadline' ? 'active' : ''}`}
+            onClick={() => handleSortChange('deadline')}
+          >
+            締切順
+          </button>
         </div>
       </div>
 
