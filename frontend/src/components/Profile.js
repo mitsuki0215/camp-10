@@ -176,7 +176,7 @@ const Profile = () => {
       case 'Gold':
         return { current: 5000, next: 10000, nextRank: 'Platinum' };
       case 'Platinum':
-        return { current: 10000, next: 10000, nextRank: 'Max' };
+        return { current: 10000, next: 1000000, nextRank: 'Max' };
       default:
         return { current: 0, next: 2000, nextRank: 'Silver' };
     }

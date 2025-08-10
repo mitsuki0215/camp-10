@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from "uuid";
 import { surveyService } from '../services/surveyService';
+import { useAuth } from '../contexts/AuthContext';
 import './Anq.css';
 
 const defaultQuestion = () => ({
@@ -14,6 +15,7 @@ const defaultQuestion = () => ({
 
 const Anq = () => {
   const navigate = useNavigate();
+  const { supabaseUser } = useAuth();
   const [questions, setQuestions] = useState([defaultQuestion()]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -86,10 +88,14 @@ const Anq = () => {
       newErrors.requiredPoints = '半角数字で設定してください';
     } else {
       const pointsValue = parseInt(requiredPoints) || 0;
+      const userPoints = supabaseUser?.points || 0;
+      
       if (pointsValue < 1000) {
         newErrors.requiredPoints = '必要ポイントが足りません';
       } else if (pointsValue % 100 !== 0) {
         newErrors.requiredPoints = '必要ポイントは100ポイント単位で設定してください';
+      } else if (pointsValue > userPoints) {
+        newErrors.requiredPoints = `所持ポイント（${userPoints.toLocaleString()}P）が不足しています。必要なポイントは${pointsValue.toLocaleString()}Pです。`;
       }
     }
 
@@ -286,7 +292,10 @@ const Anq = () => {
             </div>
             
             <div className="input-group">
-              <label htmlFor="required-points">必要ポイント *</label>
+              <label htmlFor="required-points">
+                必要ポイント * 
+                <span className="points-info">（現在の所持ポイント: {(supabaseUser?.points || 0).toLocaleString()}P）</span>
+              </label>
               <input
                 id="required-points"
                 type="text"

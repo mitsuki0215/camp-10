@@ -54,6 +54,17 @@
   font-size: 0.95rem;
 }
 
+/* ポイント情報表示 */
+.points-info {
+  font-weight: 500;
+  color: #059669;
+  font-size: 0.85rem;
+  background: rgba(5, 150, 105, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  margin-left: 0.5rem;
+}
+
 /* 横並びレイアウト */
 .input-row {
   display: flex;
