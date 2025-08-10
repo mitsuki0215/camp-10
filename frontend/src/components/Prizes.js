@@ -123,9 +123,20 @@ const Prizes = () => {
         </div>
       </div>
 
+      {/* お知らせ */}
+      <div className="announcement-banner">
+        <div className="announcement-content">
+          <span className="announcement-icon">🚀</span>
+          <div className="announcement-text">
+            <h3>懸賞サービス近日リリース予定！</h3>
+            <p>現在はデモ版です。正式リリースをお楽しみに！</p>
+          </div>
+        </div>
+      </div>
+
       {/* ガチャ説明 */}
       <div className="gacha-info">
-        <h2>🎰 ポイントガチャ</h2>
+        <h2>🎰 ポイントガチャ（デモ版）</h2>
         <div className="gacha-rules">
           <p><strong>1000ポイント</strong>で1回挑戦できます！</p>
           <div className="prize-list">
@@ -215,6 +226,10 @@ const Prizes = () => {
           >
             {isSpinning ? '回転中...' : currentPoints < 1000 ? 'ポイント不足' : 'ガチャを回す (1000P)'}
           </button>
+
+          <p className="gacha-warning">
+            ※ 実際にポイントが消費されますのでご注意ください
+          </p>
 
           {showResult && (
             <button className="reset-button" onClick={resetResult}>
