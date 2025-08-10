@@ -68,6 +68,12 @@ async def create_survey(
     db: Session = Depends(get_db)
 ):
     """Create a new survey"""
+    # Debug logging
+    print(f"DEBUG: Received survey data:")
+    print(f"  required_points: {survey.required_points}")
+    print(f"  target_responses: {survey.target_responses}")
+    print(f"  estimated_time: {survey.estimated_time}")
+    
     # Check if user has enough points
     if current_user.points < survey.required_points:
         raise HTTPException(
@@ -78,13 +84,17 @@ async def create_survey(
     # Convert questions to dict format for JSON storage
     questions_dict = [q.dict() for q in survey.questions]
     
+    # Calculate reward points as 10% of required points
+    calculated_reward_points = int(survey.required_points * 0.1)
+    print(f"DEBUG: Calculated reward_points: {calculated_reward_points} (10% of {survey.required_points})")
+    
     db_survey = Survey(
         title=survey.title,
         description=survey.description,
         questions=questions_dict,
         creator_id=current_user.id,
         required_points=survey.required_points,
-        reward_points=survey.reward_points,
+        reward_points=calculated_reward_points,
         target_responses=survey.target_responses,
         estimated_time=survey.estimated_time
     )
@@ -95,23 +105,6 @@ async def create_survey(
     
     # Deduct required points from user
     current_user.points -= survey.required_points
-    
-    # Award bonus points and experience for creating survey
-    current_user.points += 10
-    current_user.experience += 50
-    
-    # Check for rank upgrade
-    if current_user.experience >= current_user.experience_to_next:
-        current_user.experience -= current_user.experience_to_next
-        current_user.experience_to_next = int(current_user.experience_to_next * 1.5)
-        
-        # Simple rank system
-        if current_user.rank == "Bronze" and current_user.experience_to_next >= 150:
-            current_user.rank = "Silver"
-        elif current_user.rank == "Silver" and current_user.experience_to_next >= 300:
-            current_user.rank = "Gold"
-        elif current_user.rank == "Gold" and current_user.experience_to_next >= 600:
-            current_user.rank = "Platinum"
     
     db.commit()
     
@@ -290,6 +283,7 @@ async def submit_survey_response(
             )
     
     # Create response
+    # Use the reward points stored in database (calculated as 10% of required_points)
     points_earned = survey.reward_points if user_to_use else 0
     
     db_response = SurveyResponse(

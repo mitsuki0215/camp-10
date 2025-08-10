@@ -81,7 +81,7 @@ class SurveyBase(BaseSchema):
 class SurveyCreate(SurveyBase):
     questions: List[QuestionBase]
     required_points: Optional[int] = Field(default=1000, alias='requiredPoints')
-    reward_points: Optional[int] = Field(default=50, alias='rewardPoints')
+    # reward_points should not be set from frontend - will be calculated as 10% of required_points
     target_responses: Optional[int] = Field(default=50, alias='targetResponses')
     estimated_time: Optional[int] = Field(default=5, alias='estimatedTime')
     
