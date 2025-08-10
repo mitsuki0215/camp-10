@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { onAuthStateChange } from '../firebase/auth';
 import { userService } from '../services/userService';
 
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   }, []); // 依存配列を空にして無限ループを防止
 
   // Supabaseユーザーデータを手動で更新する関数
-  const refreshSupabaseUser = async () => {
+  const refreshSupabaseUser = useCallback(async () => {
     try {
       if (user) {
         const updatedUser = await userService.getUserByFirebaseUid(user.uid);
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Failed to refresh user data:', error);
       throw error;
     }
-  };
+  }, [user]);
 
   const value = {
     user, // Firebase user

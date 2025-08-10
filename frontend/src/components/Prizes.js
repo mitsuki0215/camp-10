@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { userService } from '../services/userService';
 import './Prizes.css';
 
 const Prizes = () => {
-  const [userPoints, setUserPoints] = useState(5000); // デモ用のポイント
+  const { supabaseUser, refreshSupabaseUser } = useAuth();
+  const [currentPoints, setCurrentPoints] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [prizeResult, setPrizeResult] = useState(null);
   const [spinCount, setSpinCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const prizes = [
     { id: 1, name: '100円ゲット!', probability: 0.01, value: 100, color: '#FFD700', icon: '💰' },
@@ -18,8 +22,16 @@ const Prizes = () => {
     { id: 6, name: 'はずれ', probability: 0.75, value: 0, color: '#FF6B6B', icon: '😢' }
   ];
 
+  // ユーザーポイントの初期化（軽量）
+  useEffect(() => {
+    if (supabaseUser) {
+      setCurrentPoints(supabaseUser.points || 0);
+      setLoading(false);
+    }
+  }, [supabaseUser]);
+
   const spinGacha = async () => {
-    if (userPoints < 1000) {
+    if (currentPoints < 1000) {
       alert('ポイントが足りません！アンケートに回答してポイントを貯めましょう。');
       return;
     }
@@ -28,7 +40,20 @@ const Prizes = () => {
 
     setIsSpinning(true);
     setShowResult(false);
-    setUserPoints(prev => prev - 1000);
+
+    try {
+      // ポイントを消費
+      const result = await userService.updateUserPoints(-1000);
+      setCurrentPoints(result.new_points);
+      
+      // コンテキストも更新（軽量）
+      await refreshSupabaseUser();
+    } catch (error) {
+      console.error('Failed to deduct points:', error);
+      alert('ポイントの消費に失敗しました。');
+      setIsSpinning(false);
+      return;
+    }
 
     // ガチャの結果を決定
     const random = Math.random();
@@ -44,15 +69,22 @@ const Prizes = () => {
     }
 
     // アニメーション時間
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsSpinning(false);
       setPrizeResult(selectedPrize);
       setShowResult(true);
       setSpinCount(prev => prev + 1);
       
+      //ここの処理変えたい
       // 無料ガチャが当たった場合はポイントを返還
       if (selectedPrize.value === 'free') {
-        setUserPoints(prev => prev + 1000);
+        try {
+          const result = await userService.updateUserPoints(1000);
+          setCurrentPoints(result.new_points);
+          await refreshSupabaseUser();
+        } catch (error) {
+          console.error('Failed to refund points:', error);
+        }
       }
     }, 3000);
   };
@@ -61,6 +93,14 @@ const Prizes = () => {
     setShowResult(false);
     setPrizeResult(null);
   };
+
+  if (loading) {
+    return (
+      <div className="prizes-container">
+        <div className="loading-message">ユーザー情報を読み込み中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="prizes-container">
@@ -78,14 +118,25 @@ const Prizes = () => {
           <div className="points-icon">💰</div>
           <div className="points-info">
             <h3>保有ポイント</h3>
-            <p className="points-value">{userPoints.toLocaleString()} P</p>
+            <p className="points-value">{currentPoints.toLocaleString()} P</p>
+          </div>
+        </div>
+      </div>
+
+      {/* お知らせ */}
+      <div className="announcement-banner">
+        <div className="announcement-content">
+          <span className="announcement-icon">🚀</span>
+          <div className="announcement-text">
+            <h3>懸賞サービス近日リリース予定！</h3>
+            <p>現在はデモ版です。正式リリースをお楽しみに！</p>
           </div>
         </div>
       </div>
 
       {/* ガチャ説明 */}
       <div className="gacha-info">
-        <h2>🎰 ポイントガチャ</h2>
+        <h2>🎰 ポイントガチャ（デモ版）</h2>
         <div className="gacha-rules">
           <p><strong>1000ポイント</strong>で1回挑戦できます！</p>
           <div className="prize-list">
@@ -171,10 +222,14 @@ const Prizes = () => {
           <button 
             className={`gacha-button ${isSpinning ? 'spinning' : ''}`}
             onClick={spinGacha}
-            disabled={isSpinning || userPoints < 1000}
+            disabled={isSpinning || currentPoints < 1000}
           >
-            {isSpinning ? '回転中...' : userPoints < 1000 ? 'ポイント不足' : 'ガチャを回す (1000P)'}
+            {isSpinning ? '回転中...' : currentPoints < 1000 ? 'ポイント不足' : 'ガチャを回す (1000P)'}
           </button>
+
+          <p className="gacha-warning">
+            ※ 実際にポイントが消費されますのでご注意ください
+          </p>
 
           {showResult && (
             <button className="reset-button" onClick={resetResult}>

@@ -9,7 +9,6 @@ const ProfileEdit = () => {
   const navigate = useNavigate();
   const { refreshSupabaseUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState(null);
   
   // 編集用の状態管理
   const [formData, setFormData] = useState({
@@ -65,7 +64,6 @@ const ProfileEdit = () => {
 
         const data = await userService.getUserByFirebaseUid(user.uid);
         if (data) {
-          setUserData(data);
           setFormData({
             name: data.name || "",
             grade: data.grade || "B1",
@@ -138,11 +136,12 @@ const ProfileEdit = () => {
     <div className="profile-edit-container">
       {/* ヘッダー部分 */}
       <div className="profile-edit-header">
-        <Link to="/profile" className="back-button">
+        <Link to="/profile" className="profile-edit-back-button">
           ← プロフィールに戻る
         </Link>
+
         <h1 className="page-title">プロフィール編集</h1>
-        
+
       </div>
 
       {/* 編集フォーム */}

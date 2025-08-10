@@ -17,12 +17,47 @@ router = APIRouter(prefix="/api/surveys", tags=["surveys"])
 async def get_surveys(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
+    sort_by: str = Query("default", regex="^(default|latest|deadline)$"),
     db: Session = Depends(get_db)
 ):
-    """Get list of active surveys"""
-    surveys = db.query(Survey).filter(
+    """Get list of active surveys with sorting options"""
+    # Base query with joins to get creator rank
+    query = db.query(Survey).join(User, Survey.creator_id == User.id).filter(
         Survey.is_active == True
-    ).offset(skip).limit(limit).all()
+    )
+    
+    # Apply sorting based on sort_by parameter
+    if sort_by == "default":
+        # Default: Sort by points (desc) and creator rank priority
+        # Rank priority: Platinum=4, Gold=3, Silver=2, Bronze=1
+        rank_priority = {
+            'Platinum': 4,
+            'Gold': 3, 
+            'Silver': 2,
+            'Bronze': 1
+        }
+        surveys = query.all()
+        
+        # Sort by required_points (primary) and rank priority (secondary)
+        surveys.sort(key=lambda s: (
+            s.required_points * 1000 +  # Primary: points (multiplied for priority)
+            rank_priority.get(s.creator.rank, 1) * 100  # Secondary: rank
+        ), reverse=True)
+        
+        # Apply pagination manually after sorting
+        surveys = surveys[skip:skip + limit]
+        
+    elif sort_by == "latest":
+        # Sort by creation date (newest first)
+        surveys = query.order_by(Survey.created_at.desc()).offset(skip).limit(limit).all()
+        
+    elif sort_by == "deadline":
+        # Sort by deadline (earliest first, null deadlines at end)
+        surveys = query.order_by(Survey.deadline.asc().nullslast()).offset(skip).limit(limit).all()
+    
+    else:
+        # Fallback to default
+        surveys = query.order_by(Survey.created_at.desc()).offset(skip).limit(limit).all()
     
     # Convert to SurveyList format
     survey_list = []
@@ -96,7 +131,8 @@ async def create_survey(
         required_points=survey.required_points,
         reward_points=calculated_reward_points,
         target_responses=survey.target_responses,
-        estimated_time=survey.estimated_time
+        estimated_time=survey.estimated_time,
+        deadline=survey.deadline
     )
     
     db.add(db_survey)
@@ -303,17 +339,22 @@ async def submit_survey_response(
         user_to_use.points += points_earned
         user_to_use.experience += points_earned
         
-        # Check for rank upgrade
-        if user_to_use.experience >= user_to_use.experience_to_next:
-            user_to_use.experience -= user_to_use.experience_to_next
-            user_to_use.experience_to_next = int(user_to_use.experience_to_next * 1.5)
-            
-            if user_to_use.rank == "Bronze" and user_to_use.experience_to_next >= 150:
-                user_to_use.rank = "Silver"
-            elif user_to_use.rank == "Silver" and user_to_use.experience_to_next >= 300:
-                user_to_use.rank = "Gold"
-            elif user_to_use.rank == "Gold" and user_to_use.experience_to_next >= 600:
-                user_to_use.rank = "Platinum"
+        # Check for rank upgrade based on total accumulated experience
+        total_experience = user_to_use.experience
+        current_rank = user_to_use.rank
+        
+        # Define rank thresholds (cumulative experience required)
+        if total_experience >= 10000 and current_rank != "Platinum":
+            user_to_use.rank = "Platinum"
+            user_to_use.experience_to_next = 0  # Max rank reached
+        elif total_experience >= 5000 and current_rank not in ["Gold", "Platinum"]:
+            user_to_use.rank = "Gold"
+            user_to_use.experience_to_next = 10000 - total_experience
+        elif total_experience >= 1000 and current_rank == "Bronze":
+            user_to_use.rank = "Silver"  
+            user_to_use.experience_to_next = 5000 - total_experience
+        elif current_rank == "Bronze":
+            user_to_use.experience_to_next = 2000 - total_experience
     
     db.commit()
     
