@@ -139,7 +139,7 @@ const Home = () => {
             className={`sort-btn ${sortBy === 'default' ? 'active' : ''}`}
             onClick={() => handleSortChange('default')}
           >
-            デフォルト
+            ポイント順
           </button>
           <button 
             className={`sort-btn ${sortBy === 'latest' ? 'active' : ''}`}
