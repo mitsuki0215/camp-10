@@ -12,8 +12,11 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true; // マウント状態を追跡
+
     const fetchUserData = async () => {
       try {
+        if (!isMounted) return; // アンマウント済みの場合は早期リターン
         setLoading(true);
         
         // プロフィール編集から戻ってきた場合、最新のユーザーデータを取得
@@ -25,23 +28,29 @@ const Profile = () => {
           }
         }
         
+        if (!isMounted) return; // アンマウント済みの場合は早期リターン
+        
         // ユーザーの統計情報を取得
         const stats = await userService.getUserStats();
+        if (!isMounted) return;
         setUserStats(stats);
 
         // 自分が作成したアンケートを取得
         try {
           const surveysData = await surveyService.getUserSurveys();
+          if (!isMounted) return;
           setMyPosts(surveysData);
         } catch (apiError) {
           console.log('API failed, trying Supabase fallback:', apiError.message);
           // フォールバック：Supabase直接取得
           try {
             const surveysData = await surveyService.getUserSurveysSupabase();
+            if (!isMounted) return;
             setMyPosts(surveysData);
           } catch (supabaseError) {
             console.error('Both API and Supabase failed:', supabaseError);
             // ダミーデータを表示
+            if (!isMounted) return;
             setMyPosts([
               {
                 id: 1,
@@ -76,6 +85,7 @@ const Profile = () => {
       } catch (error) {
         console.error('Failed to fetch user data:', error);
         // フォールバック: ダミーデータを使用
+        if (!isMounted) return;
         setMyPosts([
           {
             id: 1,
@@ -103,12 +113,19 @@ const Profile = () => {
           }
         ]);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchUserData();
-  }, [firebaseUser]); // firebaseUserが変わった時も再実行
+    
+    // クリーンアップ関数
+    return () => {
+      isMounted = false;
+    };
+  }, [firebaseUser, refreshSupabaseUser]); // refreshSupabaseUserはuseCallbackで安定化済み
 
   // アバター表示のヘルパー関数
   const getDisplayAvatar = () => {
@@ -245,10 +262,10 @@ const Profile = () => {
     <div className="profile-container">
       {/* ヘッダー部分 */}
       <div className="profile-header">
-        <Link to="/" className="back-button">
+        <Link to="/" className="profile-back-button">
           ← ホームに戻る
         </Link>
-        <h1 className="page-title">プロフィール</h1>
+        <h1 className="profile-page-title">プロフィール</h1>
         <div className="profile-actions">
           <Link to="/profile/edit" className="edit-profile-btn">
             ✏️ プロフィール編集
@@ -298,7 +315,7 @@ const Profile = () => {
 
       {/* ポイント情報 */}
       <div className="points-section">
-        <div className="points-card">
+        <div className="profile-points-card">
           <div className="points-icon">💰</div>
           <div className="points-info">
             <h3>保有ポイント</h3>
