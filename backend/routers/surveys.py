@@ -96,23 +96,6 @@ async def create_survey(
     # Deduct required points from user
     current_user.points -= survey.required_points
     
-    # Award bonus points and experience for creating survey
-    current_user.points += 10
-    current_user.experience += 50
-    
-    # Check for rank upgrade
-    if current_user.experience >= current_user.experience_to_next:
-        current_user.experience -= current_user.experience_to_next
-        current_user.experience_to_next = int(current_user.experience_to_next * 1.5)
-        
-        # Simple rank system
-        if current_user.rank == "Bronze" and current_user.experience_to_next >= 150:
-            current_user.rank = "Silver"
-        elif current_user.rank == "Silver" and current_user.experience_to_next >= 300:
-            current_user.rank = "Gold"
-        elif current_user.rank == "Gold" and current_user.experience_to_next >= 600:
-            current_user.rank = "Platinum"
-    
     db.commit()
     
     return db_survey
