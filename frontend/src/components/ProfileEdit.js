@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { userService } from '../services/userService';
+import { auth } from '../firebase/config';
+import { useAuth } from '../contexts/AuthContext';
 import './ProfileEdit.css';
 
 const ProfileEdit = () => {
+  const navigate = useNavigate();
+  const { refreshSupabaseUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
+  
   // 編集用の状態管理
   const [formData, setFormData] = useState({
-    name: "田中 太郎",
-    grade: "B3",
+    name: "",
+    grade: "",
     avatar: "👤"
   });
 
@@ -19,6 +27,59 @@ const ProfileEdit = () => {
     "M1", "M2",
     "D1", "D2", "D3", "D4"
   ];
+
+  // アバター表示のヘルパー関数
+  const getValidAvatar = (avatarUrl) => {
+    if (!avatarUrl) return "👤";
+    
+    // URLっぽい文字列（http, https, データURLなど）は除外
+    if (avatarUrl.includes('http') || avatarUrl.includes('data:')) {
+      console.log('ProfileEdit: Invalid avatar (URL detected):', avatarUrl);
+      return "👤";
+    }
+    
+    // 許可されたアバター絵文字のホワイトリスト
+    const allowedAvatars = [
+      "👤", "😀", "😊", "🤓", "😎", "🤗", "🙂", "😌", "🥸", 
+      "👨‍🎓", "👩‍🎓", "🧑‍💻"
+    ];
+    
+    if (allowedAvatars.includes(avatarUrl)) {
+      console.log('ProfileEdit: Valid avatar confirmed:', avatarUrl);
+      return avatarUrl; // 許可された絵文字の場合はそのまま使用
+    }
+    
+    console.log('ProfileEdit: Invalid avatar (not in whitelist):', avatarUrl);
+    return "👤"; // デフォルトアイコンを返す
+  };
+
+  // 現在のユーザー情報を取得
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          navigate('/signin');
+          return;
+        }
+
+        const data = await userService.getUserByFirebaseUid(user.uid);
+        if (data) {
+          setUserData(data);
+          setFormData({
+            name: data.name || "",
+            grade: data.grade || "B1",
+            avatar: getValidAvatar(data.avatar_url)
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+        alert('ユーザー情報の取得に失敗しました');
+      }
+    };
+
+    loadUserData();
+  }, [navigate]);
 
   // フォームの変更ハンドラー
   const handleInputChange = (e) => {
@@ -37,10 +98,40 @@ const ProfileEdit = () => {
     }));
   };
 
-  // 保存ハンドラー（現在は仮実装）
-  const handleSave = () => {
-    alert('プロフィールが保存されました！');
-    // 実際の実装では、APIに保存処理を送信
+  // 保存ハンドラー
+  const handleSave = async () => {
+    if (loading) return;
+
+    // バリデーション
+    if (!formData.name.trim()) {
+      alert('名前を入力してください');
+      return;
+    }
+
+    // アバターが有効な絵文字かチェック
+    const validAvatar = getValidAvatar(formData.avatar);
+
+    setLoading(true);
+    try {
+      const updateData = {
+        name: formData.name.trim(),
+        grade: formData.grade,
+        avatar_url: validAvatar
+      };
+
+      await userService.updateUserProfile(updateData);
+      
+      // AuthContextのユーザーデータを更新
+      await refreshSupabaseUser();
+      
+      alert('プロフィールが保存されました！');
+      navigate('/profile');
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      alert('プロフィールの保存に失敗しました。もう一度お試しください。');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,8 +142,12 @@ const ProfileEdit = () => {
           ← プロフィールに戻る
         </Link>
         <h1 className="page-title">プロフィール編集</h1>
-        <button className="save-btn" onClick={handleSave}>
-          💾 保存
+        <button 
+          className="save-btn" 
+          onClick={handleSave}
+          disabled={loading}
+        >
+          {loading ? '保存中...' : '💾 保存'}
         </button>
       </div>
 
@@ -140,8 +235,12 @@ const ProfileEdit = () => {
           <Link to="/profile" className="cancel-btn">
             キャンセル
           </Link>
-          <button className="save-main-btn" onClick={handleSave}>
-            変更を保存
+          <button 
+            className="save-main-btn" 
+            onClick={handleSave}
+            disabled={loading}
+          >
+            {loading ? '保存中...' : '変更を保存'}
           </button>
         </div>
       </div>
