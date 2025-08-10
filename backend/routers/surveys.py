@@ -339,17 +339,22 @@ async def submit_survey_response(
         user_to_use.points += points_earned
         user_to_use.experience += points_earned
         
-        # Check for rank upgrade
-        if user_to_use.experience >= user_to_use.experience_to_next:
-            user_to_use.experience -= user_to_use.experience_to_next
-            user_to_use.experience_to_next = int(user_to_use.experience_to_next * 1.5)
-            
-            if user_to_use.rank == "Bronze" and user_to_use.experience_to_next >= 150:
-                user_to_use.rank = "Silver"
-            elif user_to_use.rank == "Silver" and user_to_use.experience_to_next >= 300:
-                user_to_use.rank = "Gold"
-            elif user_to_use.rank == "Gold" and user_to_use.experience_to_next >= 600:
-                user_to_use.rank = "Platinum"
+        # Check for rank upgrade based on total accumulated experience
+        total_experience = user_to_use.experience
+        current_rank = user_to_use.rank
+        
+        # Define rank thresholds (cumulative experience required)
+        if total_experience >= 10000 and current_rank != "Platinum":
+            user_to_use.rank = "Platinum"
+            user_to_use.experience_to_next = 0  # Max rank reached
+        elif total_experience >= 5000 and current_rank not in ["Gold", "Platinum"]:
+            user_to_use.rank = "Gold"
+            user_to_use.experience_to_next = 10000 - total_experience
+        elif total_experience >= 1000 and current_rank == "Bronze":
+            user_to_use.rank = "Silver"  
+            user_to_use.experience_to_next = 5000 - total_experience
+        elif current_rank == "Bronze":
+            user_to_use.experience_to_next = 2000 - total_experience
     
     db.commit()
     
