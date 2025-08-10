@@ -154,10 +154,10 @@ const AnswerSurvey = () => {
     return (
       <div className="answer-survey-container">
         <div className="answer-header">
-          <Link to="/" className="back-button">
+          <Link to="/" className="answer-back-button">
             ← ホームに戻る
           </Link>
-          <h1 className="page-title">アンケート詳細</h1>
+          <h1 className="answer-page-title">アンケート詳細</h1>
         </div>
         
         <div className="survey-info">
@@ -184,10 +184,10 @@ const AnswerSurvey = () => {
     return (
       <div className="answer-survey-container">
         <div className="answer-header">
-          <Link to="/" className="back-button">
+          <Link to="/" className="answer-back-button">
             ← ホームに戻る
           </Link>
-          <h1 className="page-title">アンケート詳細</h1>
+          <h1 className="answer-page-title">アンケート詳細</h1>
         </div>
         
         <div className="survey-info">
@@ -216,10 +216,10 @@ const AnswerSurvey = () => {
     <div className="answer-survey-container">
       {/* ヘッダー */}
       <div className="answer-header">
-        <Link to="/" className="back-button">
+        <Link to="/" className="answer-back-button">
           ← ホームに戻る
         </Link>
-        <h1 className="page-title">アンケート回答</h1>
+        <h1 className="answer-page-title">アンケート回答</h1>
       </div>
 
       {/* アンケート情報 */}
