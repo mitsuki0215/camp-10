@@ -97,7 +97,14 @@ const Home = () => {
     <div className="home-container">
       {/* ヘッダー部分 */}
       <div className="home-header">
-        <h1 className="app-title">Questly</h1>
+        <div className="title-with-profile">
+          <h1 className="app-title">Questly</h1>
+          <Link to="/profile" className="profile-icon mobile-profile-icon">
+            <div className="profile-avatar">
+              <span>{getDisplayAvatar(supabaseUser)}</span>
+            </div>
+          </Link>
+        </div>
         <div className="header-actions">
           <Link to="/anq" className="add-survey-btn">
             <span className="plus-icon">+</span>
@@ -107,13 +114,13 @@ const Home = () => {
             <span className="plus-icon">🎁</span>
             懸賞
           </Link>
-          <Link to="/profile" className="profile-icon">
+          <Link to="/profile" className="profile-icon desktop-profile-icon">
             <div className="profile-avatar">
               <span>{getDisplayAvatar(supabaseUser)}</span>
             </div>
           </Link>
           {user && (
-            <button onClick={handleLogout} className="logout-btn">
+            <button onClick={handleLogout} className="logout-btn desktop-logout-btn">
               ログアウト
             </button>
           )}
@@ -184,6 +191,15 @@ const Home = () => {
           ))}
         </div>
       </div>
+
+      {/* モバイル用ログアウトボタン */}
+      {user && (
+        <div className="mobile-logout-section">
+          <button onClick={handleLogout} className="logout-btn mobile-logout-btn">
+            ログアウト
+          </button>
+        </div>
+      )}
     </div>
   );
 };

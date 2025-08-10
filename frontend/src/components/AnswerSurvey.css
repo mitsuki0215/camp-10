@@ -484,36 +484,61 @@
   }
 
   .answer-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+    position: relative;
+    margin-bottom: 2rem;
+    min-height: 85px;
+    display: block;
+    padding: 0 0.5rem;
   }
 
-  .page-title {
-    font-size: 1.75rem;
+  .answer-back-button {
+    position: absolute;
+    top: 0;
+    left: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .answer-page-title {
+    font-size: 1.5rem;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 1rem);
+    text-align: center;
+    margin: 0;
+    color: var(--primary-purple);
+  }
+
+  .survey-info {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .survey-title {
+    font-size: 1.3rem;
+  }
+
+  .questions-container {
+    gap: 1.5rem;
   }
 
   .question-card {
     padding: 1.5rem;
   }
 
-  .survey-info {
-    padding: 1.5rem;
+  .question-number {
+    font-size: 1rem;
   }
 
-  .survey-title {
-    font-size: 1.5rem;
+  .question-text {
+    font-size: 0.95rem;
   }
 
-  .action-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .cancel-btn,
-  .submit-btn {
-    width: 100%;
-    max-width: 300px;
+  .text-input,
+  .textarea-input {
+    font-size: 1rem;
   }
 
   .radio-options,
@@ -521,36 +546,100 @@
     gap: 0.75rem;
   }
 
-  .radio-option,
-  .checkbox-option {
+  .radio-text,
+  .checkbox-text {
+    font-size: 0.9rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
     padding: 0.75rem;
+  }
+
+  .already-responded,
+  .creator-warning {
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .creator-actions,
+  .responded-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .view-profile-btn,
+  .view-results-btn,
+  .back-home-btn {
+    width: 100%;
+    padding: 0.75rem;
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  .page-title {
-    font-size: 1.5rem;
+  .answer-survey-container {
+    padding: 0.75rem;
   }
 
-  .question-card {
-    padding: 1rem;
+  .answer-header {
+    padding: 0;
+  }
+
+  .answer-page-title {
+    font-size: 1.3rem;
   }
 
   .survey-info {
     padding: 1rem;
   }
 
-  .question-text {
-    font-size: 1rem;
+  .survey-title {
+    font-size: 1.2rem;
+  }
+
+  .question-card {
+    padding: 1rem;
+  }
+
+  .question-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .required-mark {
+    align-self: flex-start;
   }
 
   .text-input,
   .textarea-input {
-    padding: 0.75rem;
+    padding: 0.6rem;
   }
 
   .radio-option,
   .checkbox-option {
-    padding: 0.75rem;
+    padding: 0.6rem;
+  }
+
+  .action-buttons {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1rem 0;
+    margin: 0 -0.75rem;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    padding: 0.8rem;
+    font-size: 1rem;
   }
 }

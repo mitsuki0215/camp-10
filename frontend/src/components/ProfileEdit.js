@@ -139,14 +139,9 @@ const ProfileEdit = () => {
         <Link to="/profile" className="profile-edit-back-button">
           ← プロフィールに戻る
         </Link>
-        <h1 className="profile-edit-page-title">プロフィール編集</h1>
-        <button 
-          className="save-btn" 
-          onClick={handleSave}
-          disabled={loading}
-        >
-          {loading ? '保存中...' : '💾 保存'}
-        </button>
+
+        <h1 className="page-title">プロフィール編集</h1>
+
       </div>
 
       {/* 編集フォーム */}

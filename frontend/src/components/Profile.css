@@ -63,6 +63,7 @@
 .page-title {
   font-size: 2rem;
   font-weight: 700;
+  padding-top: 50px;
   color: var(--primary-purple);
   margin: 0;
   flex: 1;
@@ -406,6 +407,226 @@
 
 .survey-actions {
   display: flex;
+
+  gap: 1rem;
+}
+
+.view-results-btn,
+.publish-toggle-btn,
+.delete-survey-btn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.view-results-btn {
+  background: linear-gradient(135deg, var(--primary-purple), var(--accent-purple));
+  color: var(--white);
+}
+
+.view-results-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+}
+
+.publish-toggle-btn {
+  background: var(--success-green);
+  color: var(--white);
+}
+
+.publish-toggle-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.delete-survey-btn {
+  background: #ef4444;
+  color: var(--white);
+}
+
+.delete-survey-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+
+  .profile-header {
+    position: relative;
+    margin-bottom: 2rem;
+    min-height: 80px;
+    display: block;
+  }
+
+  .back-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+    margin: 0;
+  }
+
+  .profile-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .edit-profile-btn {
+    width: 100%;
+    max-width: 200px;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .user-info-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .user-name {
+    font-size: 1.4rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rank-section {
+    padding: 1.5rem;
+  }
+
+  .rank-info {
+    align-items: center;
+    text-align: center;
+  }
+
+  .rank-badge {
+    align-self: center;
+  }
+
+  .points-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .points-value {
+    font-size: 2rem;
+  }
+
+  .my-survey-card {
+    padding: 1.5rem;
+  }
+
+  .survey-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .left-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .delete-btn {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 0.75rem;
+  }
+
+  .user-avatar-large {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .user-name {
+    font-size: 1.2rem;
+  }
+
+  .grade-value {
+    font-size: 1rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .points-icon {
+    font-size: 2.5rem;
+  }
+
+  .points-value {
+    font-size: 1.8rem;
+  }
+
+  .my-survey-card {
+    padding: 1rem;
+  }
+
+  .survey-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .survey-title {
+    font-size: 1.1rem;
+  }
+
+  .action-btn {
+    padding: 0.6rem;
+    min-width: unset;
+  }
+}
+
+/* 改善されたアンケート管理スタイル */
+.my-survey-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+/* アクションボタンのスタイル */
+.survey-actions {
+  display: flex;
+
   justify-content: space-between;
   align-items: flex-end;
   gap: 0.75rem;

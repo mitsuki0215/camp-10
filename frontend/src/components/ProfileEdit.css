@@ -335,57 +335,173 @@
   box-shadow: 0 6px 20px rgba(107, 70, 193, 0.4);
 }
 
-/* レスポンシブデザイン */
+/* モバイル対応 */
 @media (max-width: 768px) {
   .profile-edit-container {
     padding: 1rem;
   }
 
   .profile-edit-header {
-    flex-direction: column;
-    gap: 1rem;
+    position: relative;
+    margin-bottom: 2rem;
+    min-height: 110px;
+    display: block;
     text-align: center;
+    padding: 0;
   }
 
-  .page-title {
-    font-size: 1.75rem;
-  }
-
-  .avatar-edit-section {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .avatar-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .profile-preview {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .preview-name {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .edit-section {
-    padding: 1.5rem;
+  .back-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.875rem;
+    z-index: 10;
+    color: var(--primary-purple);
   }
 
   .page-title {
     font-size: 1.5rem;
+    position: absolute;
+    top: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    color: var(--primary-purple);
+  }
+
+  .save-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.875rem;
+    z-index: 10;
+  }
+
+  .edit-form {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+  }
+
+  .avatar-selection {
+    gap: 1rem;
   }
 
   .avatar-grid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+  }
+
+  .avatar-option {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-input, .form-select {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1rem;
+    margin: 0 -1.5rem -1.5rem;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .cancel-btn, .save-btn {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .success-message, .error-message {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-edit-container {
+    padding: 0.75rem;
+  }
+
+  .profile-edit-header {
+    min-height: 120px;
+  }
+
+  .page-title {
+    font-size: 1.3rem;
+    top: 70px;
+  }
+
+  .back-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .save-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .edit-form {
+    padding: 1rem;
+  }
+
+  .current-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .avatar-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .avatar-option {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+  }
+
+  .form-input, .form-select {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .action-buttons {
+    padding: 0.75rem;
+    margin: 0 -1rem -1rem;
+  }
+
+  .cancel-btn, .save-btn {
+    padding: 0.7rem;
+    font-size: 0.9rem;
   }
 }
