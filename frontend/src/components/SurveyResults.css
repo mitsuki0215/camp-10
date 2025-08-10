@@ -39,6 +39,22 @@
   margin: 0;
 }
 
+/* SurveyResults専用の紫色スタイル */
+.survey-page-title {
+  color: #5a4fcf !important;
+}
+
+.survey-back-button {
+  color: #5a4fcf !important;
+  border-color: #5a4fcf !important;
+}
+
+.survey-back-button:hover {
+  background-color: #5a4fcf !important;
+  color: white !important;
+  border-color: #5a4fcf !important;
+}
+
 .export-csv-btn {
   background: #10b981;
   color: white;
