@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import './Profile.css';
 
 const Profile = () => {
-  const { user: firebaseUser, supabaseUser } = useAuth();
+  const { user: firebaseUser, supabaseUser, refreshSupabaseUser } = useAuth();
   const [userStats, setUserStats] = useState(null);
   const [myPosts, setMyPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +15,15 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
+        
+        // プロフィール編集から戻ってきた場合、最新のユーザーデータを取得
+        if (firebaseUser) {
+          try {
+            await refreshSupabaseUser();
+          } catch (error) {
+            console.log('Failed to refresh user data, continuing with existing data:', error);
+          }
+        }
         
         // ユーザーの統計情報を取得
         const stats = await userService.getUserStats();
@@ -99,7 +108,34 @@ const Profile = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [firebaseUser]); // firebaseUserが変わった時も再実行
+
+  // アバター表示のヘルパー関数
+  const getDisplayAvatar = () => {
+    const avatarUrl = supabaseUser?.avatar_url;
+    
+    if (!avatarUrl) return '👤';
+    
+    // URLっぽい文字列（http, https, データURLなど）は除外
+    if (avatarUrl.includes('http') || avatarUrl.includes('data:')) {
+      console.log('Profile: Invalid avatar (URL detected):', avatarUrl);
+      return '👤';
+    }
+    
+    // 許可されたアバター絵文字のホワイトリスト
+    const allowedAvatars = [
+      "👤", "😀", "😊", "🤓", "😎", "🤗", "🙂", "😌", "🥸", 
+      "👨‍🎓", "👩‍🎓", "🧑‍💻"
+    ];
+    
+    if (allowedAvatars.includes(avatarUrl)) {
+      console.log('Profile: Valid avatar confirmed:', avatarUrl);
+      return avatarUrl; // 許可された絵文字の場合はそのまま使用
+    }
+    
+    console.log('Profile: Invalid avatar (not in whitelist):', avatarUrl);
+    return '👤'; // デフォルトアイコンを表示
+  };
 
   // ユーザー情報のフォールバック
   const displayUser = {
@@ -110,6 +146,7 @@ const Profile = () => {
     experience_to_next: userStats?.experience_to_next || supabaseUser?.experience_to_next || 100,
     points: userStats?.points || supabaseUser?.points || 0,
     grade: supabaseUser?.grade || '',
+    avatar: getDisplayAvatar(),
     created_at: supabaseUser?.created_at || new Date().toISOString(),
     created_surveys: userStats?.created_surveys || 0,
     active_surveys: userStats?.active_surveys || 0,
@@ -212,15 +249,17 @@ const Profile = () => {
           ← ホームに戻る
         </Link>
         <h1 className="page-title">プロフィール</h1>
-        <Link to="/profile/edit" className="edit-profile-btn">
-          ✏️ プロフィール編集
-        </Link>
+        <div className="profile-actions">
+          <Link to="/profile/edit" className="edit-profile-btn">
+            ✏️ プロフィール編集
+          </Link>
+        </div>
       </div>
 
       {/* ユーザー情報カード */}
       <div className="user-info-card">
         <div className="user-avatar-large">
-          <span>👤</span>
+          <span>{displayUser.avatar}</span>
         </div>
         <div className="user-details">
           <h2 className="user-name">

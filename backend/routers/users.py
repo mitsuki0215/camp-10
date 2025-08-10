@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.models.user_models import User
 from app.models.survey_models import Survey
-from app.models.schemas import UserProfile, UserBase, Survey as SurveySchema
+from app.models.schemas import UserProfile, UserBase, UserUpdate, Survey as SurveySchema
 from app.core.database import get_db
 from auth import get_current_verified_user
 
@@ -18,14 +18,18 @@ async def get_user_profile(
 
 @router.put("/profile", response_model=UserProfile)
 async def update_user_profile(
-    profile_update: UserBase,
+    profile_update: UserUpdate,
     current_user: User = Depends(get_current_verified_user),
     db: Session = Depends(get_db)
 ):
     """Update current user's profile"""
-    # Update fields
-    current_user.name = profile_update.name
-    current_user.grade = profile_update.grade
+    # Update fields only if provided
+    if profile_update.name is not None:
+        current_user.name = profile_update.name
+    if profile_update.grade is not None:
+        current_user.grade = profile_update.grade
+    if profile_update.avatar_url is not None:
+        current_user.avatar_url = profile_update.avatar_url
     
     db.commit()
     db.refresh(current_user)

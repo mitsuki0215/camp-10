@@ -2,15 +2,19 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.models import User, Survey, SurveyResponse
-from app.models.schemas import UserBase, UserStats
+from app.models.schemas import UserBase, UserUpdate, UserStats
 
 class UserService:
     """ユーザーサービス"""
     
-    def update_profile(self, db: Session, user: User, profile_update: UserBase) -> User:
+    def update_profile(self, db: Session, user: User, profile_update: UserUpdate) -> User:
         """ユーザープロフィールを更新"""
-        user.name = profile_update.name
-        user.grade = profile_update.grade
+        if profile_update.name is not None:
+            user.name = profile_update.name
+        if profile_update.grade is not None:
+            user.grade = profile_update.grade
+        if profile_update.avatar_url is not None:
+            user.avatar_url = profile_update.avatar_url
         
         db.commit()
         db.refresh(user)

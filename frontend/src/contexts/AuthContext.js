@@ -44,10 +44,25 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []); // 依存配列を空にして無限ループを防止
 
+  // Supabaseユーザーデータを手動で更新する関数
+  const refreshSupabaseUser = async () => {
+    try {
+      if (user) {
+        const updatedUser = await userService.getUserByFirebaseUid(user.uid);
+        setSupabaseUser(updatedUser);
+        return updatedUser;
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user, // Firebase user
     supabaseUser, // Supabase user data
-    loading
+    loading,
+    refreshSupabaseUser // ユーザーデータを手動で更新する関数
   };
 
   return (

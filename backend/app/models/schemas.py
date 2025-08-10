@@ -13,6 +13,11 @@ class UserBase(BaseSchema):
     name: str
     grade: Optional[str] = None
 
+class UserUpdate(BaseSchema):
+    name: Optional[str] = None
+    grade: Optional[str] = None
+    avatar_url: Optional[str] = None
+
 class UserCreate(UserBase):
     firebase_uid: str
     avatar_url: Optional[str] = None

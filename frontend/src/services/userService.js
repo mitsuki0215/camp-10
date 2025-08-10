@@ -13,21 +13,78 @@ export const userService = {
       // プロバイダー情報を取得（Google, Email, etc.）
       const provider = providerData?.[0]?.providerId || 'firebase';
       
-      // Supabaseの関数を呼び出してユーザーを作成/更新
-      const { data, error } = await supabase.rpc('upsert_user_from_firebase', {
-        firebase_uid_param: uid,
-        email_param: email,
-        name_param: displayName || email.split('@')[0], // 表示名がない場合はメールのユーザー名部分
-        avatar_url_param: photoURL,
-        provider_param: provider.includes('google') ? 'google' : 'email'
-      });
+      console.log('syncUserWithSupabase called for:', { uid, email, displayName });
+      
+      // まず既存のユーザーデータを確認
+      const existingUser = await this.getUserByFirebaseUid(uid);
+      
+      if (existingUser) {
+        console.log('Existing user found:', existingUser);
+        
+        // 既存ユーザーの場合、カスタムアバター（絵文字）がある場合は保持
+        let avatarToUse = existingUser.avatar_url;
+        
+        // 既存のアバターが無効（URL形式）またはnullの場合のみデフォルトアイコンを設定
+        if (!avatarToUse || !this.isValidEmojiAvatar(avatarToUse)) {
+          avatarToUse = '👤';
+          console.log('Using default avatar for existing user');
+        } else {
+          console.log('Preserving existing custom avatar:', avatarToUse);
+        }
+        
+        // 既存ユーザーのカスタム名前も保持
+        let nameToUse = existingUser.name;
+        
+        // 既存の名前が空またはデフォルト値（メールアドレスベース）の場合のみ、Firebaseの表示名を使用
+        const emailUsername = email.split('@')[0];
+        if (!nameToUse || nameToUse === emailUsername || nameToUse === 'user') {
+          nameToUse = displayName || emailUsername;
+          console.log('Using Firebase displayName for existing user with default name');
+        } else {
+          console.log('Preserving existing custom name:', nameToUse);
+        }
+        
+        // 基本情報のみを更新（名前とアバターは既存のものを保持）
+        const { data, error } = await supabase
+          .from('users')
+          .update({
+            name: nameToUse,
+            email: email,
+            provider: provider.includes('google') ? 'google' : 'email'
+            // avatar_urlは更新しない（既存のカスタムアバターを保持）
+          })
+          .eq('firebase_uid', uid)
+          .select()
+          .single();
 
-      if (error) {
-        console.error('Supabase user sync error:', error);
-        throw error;
+        if (error) {
+          console.error('Supabase user update error:', error);
+          throw error;
+        }
+
+        return data;
+      } else {
+        console.log('Creating new user');
+        
+        // 新規ユーザーの場合のみFirebaseのphotoURLをチェック
+        const validAvatarUrl = this.isValidEmojiAvatar(photoURL) ? photoURL : '👤';
+        
+        // Supabaseの関数を呼び出してユーザーを作成
+        const { data, error } = await supabase.rpc('upsert_user_from_firebase', {
+          firebase_uid_param: uid,
+          email_param: email,
+          name_param: displayName || email.split('@')[0],
+          avatar_url_param: validAvatarUrl,
+          provider_param: provider.includes('google') ? 'google' : 'email'
+        });
+
+        if (error) {
+          console.error('Supabase user creation error:', error);
+          throw error;
+        }
+
+        return data[0];
       }
-
-      return data[0]; // 関数は配列を返すため最初の要素を取得
     } catch (error) {
       console.error('Failed to sync user with Supabase:', error);
       throw error;
@@ -59,6 +116,36 @@ export const userService = {
   },
 
   /**
+   * アバターが有効な絵文字かチェック
+   * @param {string} avatarUrl - アバターURL
+   */
+  isValidEmojiAvatar(avatarUrl) {
+    if (!avatarUrl) return false;
+    
+    // URLっぽい文字列（http, https, データURLなど）は除外
+    if (avatarUrl.includes('http') || avatarUrl.includes('data:')) {
+      console.log('Invalid avatar (URL detected):', avatarUrl);
+      return false;
+    }
+    
+    // 許可されたアバター絵文字のホワイトリスト
+    const allowedAvatars = [
+      "👤", "😀", "😊", "🤓", "😎", "🤗", "🙂", "😌", "🥸", 
+      "👨‍🎓", "👩‍🎓", "🧑‍💻"
+    ];
+    
+    const isValid = allowedAvatars.includes(avatarUrl);
+    console.log('Avatar validation:', { 
+      avatarUrl, 
+      isValid, 
+      length: avatarUrl.length, 
+      byteLength: new Blob([avatarUrl]).size 
+    });
+    
+    return isValid;
+  },
+
+  /**
    * ユーザープロフィールを更新
    * @param {Object} updateData - 更新データ
    */
@@ -68,6 +155,21 @@ export const userService = {
       if (!user) {
         throw new Error('認証されたユーザーがいません');
       }
+
+      console.log('Profile update request:', updateData);
+
+      // アバターURLが絵文字でない場合はデフォルトに設定
+      if (updateData.avatar_url) {
+        const isValid = this.isValidEmojiAvatar(updateData.avatar_url);
+        if (!isValid) {
+          console.log('Invalid avatar detected, using default:', updateData.avatar_url);
+          updateData.avatar_url = '👤';
+        } else {
+          console.log('Valid avatar confirmed:', updateData.avatar_url);
+        }
+      }
+
+      console.log('Final update data:', updateData);
 
       const { data, error } = await supabase
         .from('users')
@@ -81,6 +183,7 @@ export const userService = {
         throw error;
       }
 
+      console.log('Profile update successful:', data);
       return data;
     } catch (error) {
       console.error('Failed to update profile:', error);
