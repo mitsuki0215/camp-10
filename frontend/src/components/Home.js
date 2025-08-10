@@ -20,6 +20,30 @@ const Home = () => {
     }
   };
 
+  const getDisplayAvatar = (supabaseUser) => {
+  const avatarUrl = supabaseUser?.avatar_url;
+  
+  if (!avatarUrl) return '👤';
+  
+  if (avatarUrl.includes('http') || avatarUrl.includes('data:')) {
+    console.log('Profile: Invalid avatar (URL detected):', avatarUrl);
+    return '👤';
+  }
+  
+  const allowedAvatars = [
+    "👤", "😀", "😊", "🤓", "😎", "🤗", "🙂", "😌", "🥸", 
+    "👨‍🎓", "👩‍🎓", "🧑‍💻"
+  ];
+  
+  if (allowedAvatars.includes(avatarUrl)) {
+    console.log('Profile: Valid avatar confirmed:', avatarUrl);
+    return avatarUrl;
+  }
+  
+  console.log('Profile: Invalid avatar (not in whitelist):', avatarUrl);
+  return '👤';
+};
+
   useEffect(() => {
     const fetchSurveys = async () => {
       try {
@@ -80,7 +104,7 @@ const Home = () => {
           </Link>
           <Link to="/profile" className="profile-icon">
             <div className="profile-avatar">
-              <span>👤</span>
+              <span>{getDisplayAvatar(supabaseUser)}</span>
             </div>
           </Link>
           {user && (
