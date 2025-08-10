@@ -278,5 +278,51 @@ export const userService = {
       console.error('Failed to get user stats:', error);
       throw error;
     }
+  },
+
+  /**
+   * 軽量なポイント更新（統計情報を取得しない）
+   * @param {number} pointsDelta - ポイントの増減値
+   */
+  async updateUserPoints(pointsDelta) {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('認証されたユーザーがいません');
+      }
+
+      // 現在のユーザーデータを取得
+      const currentUserData = await this.getUserByFirebaseUid(user.uid);
+      if (!currentUserData) {
+        throw new Error('ユーザーが見つかりません');
+      }
+
+      const newPoints = (currentUserData.points || 0) + pointsDelta;
+      
+      if (newPoints < 0) {
+        throw new Error('ポイントが不足しています');
+      }
+
+      // ポイントのみ更新
+      const { data, error } = await supabase
+        .from('users')
+        .update({ points: newPoints })
+        .eq('firebase_uid', user.uid)
+        .select('points')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        success: true,
+        new_points: data.points,
+        delta: pointsDelta
+      };
+    } catch (error) {
+      console.error('Failed to update points:', error);
+      throw error;
+    }
   }
 };
