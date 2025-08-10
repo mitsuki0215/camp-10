@@ -50,10 +50,10 @@ export const apiClient = {
       body: JSON.stringify(data),
     });
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-      throw { response: { data: errorData }, detail: errorData.detail, message: `HTTP error! status: ${response.status}` };
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    //   throw { response: { data: errorData }, detail: errorData.detail, message: `HTTP error! status: ${response.status}` };
+    // }
     
     return response.json();
   },
@@ -105,10 +105,10 @@ export const apiClient = {
       headers,
     });
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-      throw new Error(`${errorData.detail || errorData.message || `HTTP error! status: ${response.status}`}`);
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    //   throw new Error(`${errorData.detail || errorData.message || `HTTP error! status: ${response.status}`}`);
+    // }
     
     return response.json();
   },
@@ -133,10 +133,10 @@ export const apiClient = {
       body: data ? JSON.stringify(data) : undefined,
     });
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-      throw new Error(`${errorData.detail || errorData.message || `HTTP error! status: ${response.status}`}`);
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    //   throw new Error(`${errorData.detail || errorData.message || `HTTP error! status: ${response.status}`}`);
+    // }
     
     return response.json();
   },
@@ -158,9 +158,9 @@ export const apiClient = {
       headers,
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! status: ${response.status}`);
+    // }
     
     return response.blob();
   },
