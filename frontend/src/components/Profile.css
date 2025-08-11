@@ -497,6 +497,13 @@
     max-width: 200px;
   }
 
+  .profile-back-button {
+    /*ボタン自体を画面左揃え */
+    align-self: flex-start;
+    margin-left: 0;
+    margin-right: auto;
+  }
+
   .user-info-card {
     flex-direction: column;
     text-align: center;
