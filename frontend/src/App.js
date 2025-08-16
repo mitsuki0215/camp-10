@@ -10,6 +10,8 @@ import SurveyResults from './components/SurveyResults';
 import Prizes from './components/Prizes';
 import SignIn from './components/SignIn';
 import Welcome from './components/Welcome';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
@@ -22,6 +24,8 @@ function App() {
             {/* パブリックページ */}
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/signin" element={<SignIn />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
 
             {/* ログイン必須ページ */}
             <Route
