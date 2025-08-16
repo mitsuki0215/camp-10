@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './SignIn.css';
 
 export default function SignIn() {
@@ -90,8 +90,8 @@ export default function SignIn() {
         <div className="signin-footer">
           <p className="footer-text">
             ログインすることで、
-            <span className="footer-link">利用規約</span>と
-            <span className="footer-link">プライバシーポリシー</span>に
+            <Link to="/terms" className="footer-link">利用規約</Link>と
+            <Link to="/privacy" className="footer-link">プライバシーポリシー</Link>に
             同意したことになります。
           </p>
         </div>
