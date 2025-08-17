@@ -190,6 +190,7 @@
 
 .question-header {
   display: flex;
+  flex-direction: row;
   gap: 0.75rem;
   align-items: center;
   margin-bottom: 1rem;
@@ -421,6 +422,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield; /* Firefox用 */
+  appearance: textfield; /* 標準プロパティ */
 }
 
 /* レスポンシブ対応 */
@@ -458,19 +460,28 @@ input[type="number"] {
   }
 
   .question-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .question-input {
+    flex: 1;
+    text-align: left;
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .delete-question-btn {
+    flex-shrink: 0;
+    margin-left: auto;
   }
 
   .question-controls {
     width: 100%;
     justify-content: flex-start;
-  }
-
-  .question-input {
-    font-size: 1rem;
-    padding: 0.75rem;
   }
 
   .question-type-select {
@@ -498,27 +509,83 @@ input[type="number"] {
     width: auto;
   }
 
-  .add-option-btn, .add-question-btn, .add-question-main-btn {
+  .add-option-btn, .add-question-btn{
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
   }
 
-  .action-buttons {
-    flex-direction: column;
-    gap: 1rem;
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 1rem;
-    margin: 0 -1rem -1rem;
-    border-top: 1px solid #e2e8f0;
+  .add-question-main-btn {
+  background: linear-gradient(135deg, #a78bfa, #5a4fcf);
+  color: #ffffff;
+  border: none;
+  padding: 1.2rem 2.5rem;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 2rem auto;
+  box-shadow: 0 8px 24px rgba(90, 79, 207, 0.3);
+}  .add-question-main-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(90, 79, 207, 0.4);
   }
 
-  .cancel-btn, .submit-btn {
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-direction: column;
+  }
+
+  .cancel-btn {
+    color: #5a4fcf;
+    background: #ffffff;
+    border: 2px solid #5a4fcf;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
     width: 100%;
-    padding: 0.8rem;
+    text-align: center;
+  }
+
+  .cancel-btn:hover {
+    background: #5a4fcf;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(90, 79, 207, 0.3);
+  }
+
+  .submit-btn {
+    background: linear-gradient(135deg, #5a4fcf, #a78bfa);
+    color: #ffffff;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 20px;
     font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(90, 79, 207, 0.3);
+    width: 100%;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(90, 79, 207, 0.4);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 12px rgba(90, 79, 207, 0.3);
   }
 
   .error-message, .general-error {
@@ -544,12 +611,33 @@ input[type="number"] {
     padding: 1rem;
   }
 
-  .question-number {
-    font-size: 1rem;
+  .question-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    flex-wrap: nowrap;
   }
 
   .question-input {
+    flex: 1;
+    min-width: 0;
     padding: 0.6rem;
+    text-align: left;
+    font-size: 0.9rem;
+    max-width: calc(100% - 80px);
+  }
+
+  .delete-question-btn {
+    flex-shrink: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    min-width: auto;
+    margin-left: 0;
+    width: auto;
   }
 
   .option-input {
@@ -563,11 +651,58 @@ input[type="number"] {
   }
 
   .action-buttons {
-    padding: 0.75rem;
-    margin: 0 -0.75rem -0.75rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-direction: column;
   }
 
   .cancel-btn, .submit-btn {
-    padding: 0.7rem;
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+
+  .cancel-btn {
+    color: #5a4fcf;
+    background: #ffffff;
+    border: 2px solid #5a4fcf;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    text-align: center;
+  }
+
+  .cancel-btn:hover {
+    background: #5a4fcf;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(90, 79, 207, 0.3);
+  }
+
+  .submit-btn {
+    background: linear-gradient(135deg, #5a4fcf, #a78bfa);
+    color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(90, 79, 207, 0.3);
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(90, 79, 207, 0.4);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 12px rgba(90, 79, 207, 0.3);
   }
 }
