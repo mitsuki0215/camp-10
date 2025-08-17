@@ -479,7 +479,7 @@ const Anq = () => {
       </button>
 
         {/* アクションボタン */}
-        <div className="action-buttons">
+        <div className="anq-action-buttons">
           <Link to="/" className="cancel-btn">
             キャンセル
           </Link>
